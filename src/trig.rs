@@ -55,4 +55,10 @@ impl SinCos{
 
 		Self{sin:sin_val, cos:cos_val}
 	}
+
+	// pub fn sum_angles(self, other: Self) -> Self{
+	// 	let sin_val: i32 = (self.sin as i64) * (other.cos as i64) + (self.cos as i64) * (other.sin as i64);
+	// 	let cos_val: i32 = (self.cos as i64) * (other.cos as i64) - (self.sin as i64) * (other.sin as i64);
+	// 	Self{sin:sin_val, cos:cos_val}
+	// }
 }
