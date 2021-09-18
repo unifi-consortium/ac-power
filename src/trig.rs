@@ -30,6 +30,11 @@ fn interpolate(f1: i32, f2: i32, d1: i32, d2: i32, fract: i32) -> i32{
 	return clip_i64_to_i32((temp >> 31) + (f1 as i64));
 }
 
+#[inline(always)]
+fn multiply(a: i32, b: i32) -> i64 {
+	(a as i64) * (b as i64)
+}
+
 impl SinCos{
 	pub fn from_theta(theta: i32) -> Self{
 		/* Calculate the nearest index */
@@ -44,21 +49,41 @@ impl SinCos{
 		let mut f2: i32 = SIN_TABLE[(index_c+1) as usize] as i32;
 		let mut d1: i32 = (SIN_TABLE[(index_s+0) as usize] as i32).wrapping_neg();
 		let mut d2: i32 = (SIN_TABLE[(index_s+1) as usize] as i32).wrapping_neg();
-		let cos_val = interpolate(f1, f2, d1, d2, fract);
+		let cos = interpolate(f1, f2, d1, d2, fract);
 
 		/* Calculation of sine value */
 		f1 = SIN_TABLE[(index_s+0) as usize] as i32;
 		f2 = SIN_TABLE[(index_s+1) as usize] as i32;
 		d1 = (SIN_TABLE[(index_c+0) as usize] as i32).wrapping_neg();
 		d2 = (SIN_TABLE[(index_c+1) as usize] as i32).wrapping_neg();
-		let sin_val = interpolate(f1, f2, d1, d2, fract);
+		let sin = interpolate(f1, f2, d1, d2, fract);
 
-		Self{sin:sin_val, cos:cos_val}
+		Self{sin, cos}
 	}
 
-	// pub fn sum_angles(self, other: Self) -> Self{
-	// 	let sin_val: i32 = (self.sin as i64) * (other.cos as i64) + (self.cos as i64) * (other.sin as i64);
-	// 	let cos_val: i32 = (self.cos as i64) * (other.cos as i64) - (self.sin as i64) * (other.sin as i64);
-	// 	Self{sin:sin_val, cos:cos_val}
-	// }
+	pub fn shift_right_120(&self) -> Self {
+
+		let mut tmp: i64 = multiply(self.sin, -1073741824);
+		tmp += multiply(self.cos, 1859775393);
+		let sin: i32 = (tmp >> 32) as i32;
+
+		tmp = multiply(self.cos, -1073741824);
+		tmp -= multiply(self.sin, 1859775393);
+		let cos: i32 = (tmp >> 32) as i32;
+
+		Self{sin, cos}
+	}
+
+	pub fn shift_left_120(&self) -> Self {
+
+		let mut tmp: i64 = multiply(self.sin, -1073741824);
+		tmp -= multiply(self.cos, 1859775393);
+		let sin: i32 = (tmp >> 32) as i32;
+
+		tmp = multiply(self.cos, -1073741824);
+		tmp += multiply(self.sin, 1859775393);
+		let cos: i32 = (tmp >> 32) as i32;
+
+		Self{sin, cos}
+	}
 }

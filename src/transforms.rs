@@ -1,3 +1,4 @@
+
 // alpha beta
 #[derive(Debug)]
 pub struct AlphaBeta{
@@ -29,20 +30,29 @@ fn multiply(a: i32, b: i32) -> i64 {
 	(a as i64) * (b as i64)
 }
 
-pub fn clark(abc: Abc)->AlphaBeta{
-	let mut tmp: i64 = multiply(abc.a, 0x55555555);
-	tmp -= multiply(abc.b, 0x2aaaaaab);
-	tmp -= multiply(abc.c, 0x2aaaaaab);
-	let alpha: i32 = (tmp >> 32) as i32;
 
-	tmp = multiply(abc.b, 0x49e69d16);
-	tmp -= multiply(abc.c, 0x49e69d16);
-	let beta: i32 = (tmp >> 32) as i32;
+impl Abc {
+	pub fn to_alpha_beta(self) -> AlphaBeta {
+		let mut tmp: i64 = multiply(self.a, 0x55555555);
+		tmp -= multiply(self.b, 0x2aaaaaab);
+		tmp -= multiply(self.c, 0x2aaaaaab);
+		let alpha: i32 = (tmp >> 32) as i32;
 
-	tmp = multiply(abc.a, 0x2aaaaaab);
-	tmp += multiply(abc.b, 0x2aaaaaab);
-	tmp += multiply(abc.c, 0x2aaaaaab);
-	let gamma: i32 = (tmp >> 32) as i32;
+		tmp = multiply(self.b, 0x49e69d16);
+		tmp -= multiply(self.c, 0x49e69d16);
+		let beta: i32 = (tmp >> 32) as i32;
 
-	AlphaBeta{alpha, beta, gamma}
+		tmp = multiply(self.a, 0x2aaaaaab);
+		tmp += multiply(self.b, 0x2aaaaaab);
+		tmp += multiply(self.c, 0x2aaaaaab);
+		let gamma: i32 = (tmp >> 32) as i32;
+
+		AlphaBeta{alpha, beta, gamma}
+	}
+
+	// pub fn to_dq0(self, sin_cos: SinCos) -> Dq0 {
+		
+	// 	/* calculate SinCos s */
+
+	// }
 }
