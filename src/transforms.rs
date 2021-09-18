@@ -32,6 +32,7 @@ fn multiply(a: i32, b: i32) -> i64 {
 
 
 impl Abc {
+	// Clark Transform
 	pub fn to_alpha_beta(self) -> AlphaBeta {
 		let mut tmp: i64 = multiply(self.a, 0x55555555);
 		tmp -= multiply(self.b, 0x2aaaaaab);
@@ -50,9 +51,10 @@ impl Abc {
 		AlphaBeta{alpha, beta, gamma}
 	}
 
+	// // DQ0 Transform
 	// pub fn to_dq0(self, sin_cos: SinCos) -> Dq0 {
 		
-	// 	/* calculate SinCos s */
-
+	// 	let sin_cos_shift_right = sin_cos.shift_right_120();
+	// 	let sin_cos_shift_left = sin_cos.shift_left_120();
 	// }
 }
