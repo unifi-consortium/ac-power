@@ -13,9 +13,9 @@ mod tests {
     fn clark_transform() {
         let abc = Abc {a:3827, b:6088, c:-9914};
         let alpha_beta: AlphaBeta = clark(abc);
-        assert_eq!(alpha_beta.alpha, 1914);
+        assert_eq!(alpha_beta.alpha, 1913);
         assert_eq!(alpha_beta.beta, 4619);
-        assert_eq!(alpha_beta.gamma, -2);
+        assert_eq!(alpha_beta.gamma, 0);
     }
 
     #[test]

@@ -25,24 +25,24 @@ pub struct Dq0{
 
 
 #[inline(always)]
-fn multiply(a: i32, b: i32) -> i32 {
-	(((a as i64) * (b as i64)) >> 32) as i32
+fn multiply(a: i32, b: i32) -> i64 {
+	(a as i64) * (b as i64)
 }
 
 pub fn clark(abc: Abc)->AlphaBeta{
-	let mut tmp: i32 = multiply(abc.a, 0x55555555);
+	let mut tmp: i64 = multiply(abc.a, 0x55555555);
 	tmp -= multiply(abc.b, 0x2aaaaaab);
 	tmp -= multiply(abc.c, 0x2aaaaaab);
-	let alpha: i32 = tmp;
+	let alpha: i32 = (tmp >> 32) as i32;
 
 	tmp = multiply(abc.b, 0x49e69d16);
 	tmp -= multiply(abc.c, 0x49e69d16);
-	let beta: i32 = tmp;
+	let beta: i32 = (tmp >> 32) as i32;
 
 	tmp = multiply(abc.a, 0x2aaaaaab);
 	tmp += multiply(abc.b, 0x2aaaaaab);
 	tmp += multiply(abc.c, 0x2aaaaaab);
-	let gamma: i32 = tmp;
+	let gamma: i32 = (tmp >> 32) as i32;
 
 	AlphaBeta{alpha, beta, gamma}
 }
