@@ -54,8 +54,8 @@ impl SinCos{
 		/* Calculation of sine value */
 		f1 = SIN_TABLE[(index_s+0) as usize] as i32;
 		f2 = SIN_TABLE[(index_s+1) as usize] as i32;
-		d1 = (SIN_TABLE[(index_c+0) as usize] as i32).wrapping_neg();
-		d2 = (SIN_TABLE[(index_c+1) as usize] as i32).wrapping_neg();
+		d1 = SIN_TABLE[(index_c+0) as usize] as i32;
+		d2 = SIN_TABLE[(index_c+1) as usize] as i32;
 		let sin = interpolate(f1, f2, d1, d2, fract);
 
 		Self{sin, cos}
@@ -65,11 +65,11 @@ impl SinCos{
 
 		let mut tmp: i64 = multiply(self.sin, -1073741824);
 		tmp += multiply(self.cos, 1859775393);
-		let sin: i32 = (tmp >> 32) as i32;
+		let sin: i32 = (tmp >> 31) as i32;
 
 		tmp = multiply(self.cos, -1073741824);
 		tmp -= multiply(self.sin, 1859775393);
-		let cos: i32 = (tmp >> 32) as i32;
+		let cos: i32 = (tmp >> 31) as i32;
 
 		Self{sin, cos}
 	}
@@ -78,11 +78,11 @@ impl SinCos{
 
 		let mut tmp: i64 = multiply(self.sin, -1073741824);
 		tmp -= multiply(self.cos, 1859775393);
-		let sin: i32 = (tmp >> 32) as i32;
+		let sin: i32 = (tmp >> 31) as i32;
 
 		tmp = multiply(self.cos, -1073741824);
 		tmp += multiply(self.sin, 1859775393);
-		let cos: i32 = (tmp >> 32) as i32;
+		let cos: i32 = (tmp >> 31) as i32;
 
 		Self{sin, cos}
 	}
