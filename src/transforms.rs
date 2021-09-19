@@ -1,3 +1,4 @@
+use crate::trig::SinCos;
 
 // alpha beta
 #[derive(Debug)]
@@ -51,10 +52,31 @@ impl Abc {
 		AlphaBeta{alpha, beta, gamma}
 	}
 
-	// // DQ0 Transform
-	// pub fn to_dq0(self, sin_cos: SinCos) -> Dq0 {
+	// DQ0 Transform
+	pub fn to_dq0(self, sin_cos: SinCos) -> Dq0 {
 		
-	// 	let sin_cos_shift_right = sin_cos.shift_right_120();
-	// 	let sin_cos_shift_left = sin_cos.shift_left_120();
-	// }
+		/* sin and cos with 120 degree offsets */
+		let sin_cos_shift_right = sin_cos.shift_right_120();
+		let sin_cos_shift_left = sin_cos.shift_left_120();
+
+		let mut tmp: i64 = multiply(self.a, sin_cos.sin);
+		tmp += multiply(self.b, sin_cos_shift_left.sin);
+		tmp += multiply(self.c, sin_cos_shift_right.sin);
+		tmp = tmp >> 30;
+		let d: i32 = (multiply(tmp as i32, 0x55555555) >> 32) as i32;
+
+
+		tmp = multiply(self.a, sin_cos.cos);
+		tmp += multiply(self.b, sin_cos_shift_left.cos);
+		tmp += multiply(self.c, sin_cos_shift_right.cos);
+		tmp = tmp >> 30;
+		let q: i32 = (multiply(tmp as i32, 0x55555555) >> 32) as i32;
+
+		tmp = multiply(self.a, 0x55555555);
+		tmp += multiply(self.b, 0x55555555);
+		tmp += multiply(self.c, 0x55555555);
+		let z = (tmp >> 32) as i32;
+
+		Dq0{d, q, z}
+	}
 }
