@@ -1,3 +1,5 @@
+use fixed::{FixedI32, FixedU32};
+
 pub struct Dvoc {
 	pub v_alpha: i32,
 	pub v_beta: i32,
@@ -15,8 +17,17 @@ impl Dvoc {
 
 	}
 
-	pub fn design() -> Self {
+	pub fn design(s_rated: u32,
+		          p_rated: u32,
+		          q_rated: u32,
+		          v_nominal: u32,
+		          v_min: u32,
+		          omega_nom: u32,
+		          omega_offset_max: u32,
+		          t_max_rise: u32,
+		          t_max_ransition: u32) -> Self {
 
+		
 	}
 	pub fn step(&self) {
 
