@@ -20,14 +20,14 @@ fn clip_i64_to_i32(x: i64) -> i32{
 #[inline(always)]
 fn interpolate(f1: i32, f2: i32, d1: i32, d2: i32, fract: i32) -> i32{
 	let df = f2 - f1;
-	let mut temp: i64 = (DN as i64)*((d1 as i64) + (d2 as i64));
-	temp = temp - ((df as i64) << 32);
-	temp = (fract as i64)*(temp >> 31);
-	temp = temp + ((3*(df as i64) << 31) - ((d2 as i64) + ((d1 as i64) << 1))*(DN as i64));
-	temp = (fract as i64)*(temp >> 31);
-	temp = temp + (d1 as i64)*(DN as i64);
-	temp = (fract as i64)*(temp >> 31);
-	return clip_i64_to_i32((temp >> 31) + (f1 as i64));
+	let mut temp: i64 = i64::from(DN)*(i64::from(d1) + i64::from(d2));
+	temp = temp - (i64::from(df) << 32);
+	temp = i64::from(fract)*(temp >> 31);
+	temp = temp + ((3*i64::from(df) << 31) - (i64::from(d2) + (i64::from(d1) << 1))*i64::from(DN));
+	temp = i64::from(fract)*(temp >> 31);
+	temp = temp + i64::from(d1)*i64::from(DN);
+	temp = i64::from(fract)*(temp >> 31);
+	return clip_i64_to_i32((temp >> 31) + i64::from(f1));
 }
 
 #[inline(always)]
