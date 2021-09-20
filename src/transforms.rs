@@ -94,4 +94,19 @@ impl Abc <f32>{
 		
 		AlphaBeta{alpha, beta, gamma}
 	}
+
+	// DQ0 Transform
+	pub fn to_dq0(self, sin_cos: SinCos<f32>) -> Dq0<f32> {
+		
+		/* sin and cos with 120 degree offsets */
+		let sin_cos_shift_right = sin_cos.shift_right_120();
+		let sin_cos_shift_left = sin_cos.shift_left_120();
+
+
+		let d: f32 = 0.666666666666*(self.a*sin_cos.sin + self.b*sin_cos_shift_left.sin + self.c*sin_cos_shift_right.sin);
+		let q: f32 = 0.666666666666*(self.a*sin_cos.cos + self.b*sin_cos_shift_left.cos + self.c*sin_cos_shift_right.cos);
+		let z: f32 = 0.333333333333*self.a + 0.333333333333*self.b + 0.333333333333*self.c;
+
+		Dq0{d, q, z}
+	}
 }

@@ -35,13 +35,21 @@ mod tests {
 
     #[test]
     fn dq0_transform() {
- 
+        // test fixed-point
         let abc: Abc<i32> = Abc {a:0, b:-86603, c:86603};
         let sin_cos = SinCos::<i32>::from_theta(0);
         let dq0 = abc.to_dq0(sin_cos);
         assert_eq!(dq0.d, 100000);
         assert_eq!(dq0.q, 0);
         assert_eq!(dq0.z, 0);
+
+        // test floating-point
+        let abc: Abc<f32> = Abc {a:0.0, b:-86603.0, c:86603.0};
+        let sin_cos = SinCos::<f32>::from_theta(0.0);
+        let dq0 = abc.to_dq0(sin_cos);
+        assert_delta!(dq0.d, 100000.53, 1e-10);
+        assert_delta!(dq0.q, 0.0, 1e-10);
+        assert_delta!(dq0.z, 0.0, 1e-10);
     }
 
     #[test]
@@ -101,15 +109,23 @@ mod tests {
 
     #[test]
     fn sin_cos_shift_120() {
-        let sin_cos = SinCos::<i32>::from_theta(0);
 
+        // test fixed-point
+        let sin_cos = SinCos::<i32>::from_theta(0);
         let sin_cos_shift_right = sin_cos.shift_right_120();
         let sin_cos_shift_left = sin_cos.shift_left_120();
         assert_eq!(sin_cos_shift_right.sin, 1859775392);
-        assert_eq!(sin_cos_shift_right.cos, -1073741824);
+        assert_eq!(sin_cos_shift_right.cos, 1073741823);  // Should be 1073741824?
         assert_eq!(sin_cos_shift_left.sin, -1859775393);
-        assert_eq!(sin_cos_shift_left.cos, -1073741824);
-        // println!("right -> {:?}", sin_cos_shift_right);
-        // println!("right -> {:?}", sin_cos_shift_left);
+        assert_eq!(sin_cos_shift_left.cos, 1073741823);  // Should be 1073741824?
+
+        // test floating-point
+        let sin_cos = SinCos::<f32>::from_theta(0.0);
+        let sin_cos_shift_right = sin_cos.shift_right_120();
+        let sin_cos_shift_left = sin_cos.shift_left_120();
+        assert_delta!(sin_cos_shift_right.sin, 0.8660254, 1e-10);
+        assert_delta!(sin_cos_shift_right.cos, 0.5, 1e-10);
+        assert_delta!(sin_cos_shift_left.sin, -0.8660254, 1e-10);
+        assert_delta!(sin_cos_shift_left.cos, 0.5, 1e-10);
     }
 }

@@ -65,11 +65,11 @@ impl SinCos <i32>{
 	/// Use Ptolemy's theorem rather than a new sin/cos lookup
 	pub fn shift_right_120(&self) -> Self {
 
-		let mut tmp: i64 = multiply(self.sin, -1073741824);
+		let mut tmp: i64 = i64::from(self.sin)<<30;
 		tmp += multiply(self.cos, 1859775393);
 		let sin: i32 = (tmp >> 31) as i32;
 
-		tmp = multiply(self.cos, -1073741824);
+		tmp = i64::from(self.cos)<<30;
 		tmp -= multiply(self.sin, 1859775393);
 		let cos: i32 = (tmp >> 31) as i32;
 
@@ -81,11 +81,11 @@ impl SinCos <i32>{
 	/// Use Ptolemy's theorem rather than a new sin/cos lookup
 	pub fn shift_left_120(&self) -> Self {
 
-		let mut tmp: i64 = multiply(self.sin, -1073741824);
+		let mut tmp: i64 = i64::from(self.sin)<<30;
 		tmp -= multiply(self.cos, 1859775393);
 		let sin: i32 = (tmp >> 31) as i32;
 
-		tmp = multiply(self.cos, -1073741824);
+		tmp = i64::from(self.cos)<<30;
 		tmp += multiply(self.sin, 1859775393);
 		let cos: i32 = (tmp >> 31) as i32;
 
@@ -97,5 +97,28 @@ impl SinCos <f32>{
 	pub fn from_theta(theta: f32) -> Self {
 		let sin_cos = theta.sin_cos();
 		Self{sin:sin_cos.0, cos:sin_cos.1}
+	}
+
+	/// Shifts sin/cos values 120 degrees right (+2pi/3)
+	///
+	/// Use Ptolemy's theorem rather than a new sin/cos lookup
+	pub fn shift_right_120(&self) -> Self {
+
+
+		let sin: f32 = self.sin * 0.5 + self.cos * 0.866025403784;
+		let cos: f32 = self.cos * 0.5 - self.sin * 0.866025403784;
+
+		Self{sin, cos}
+	}
+
+	/// Shifts sin/cos values 120 degrees left (-2pi/3)
+	///
+	/// Use Ptolemy's theorem rather than a new sin/cos lookup
+	pub fn shift_left_120(&self) -> Self {
+
+		let sin: f32 = self.sin * 0.5 - self.cos * 0.866025403784;
+		let cos: f32 = self.cos * 0.5 + self.sin * 0.866025403784;
+
+		Self{sin, cos}
 	}
 }
