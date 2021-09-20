@@ -1,9 +1,9 @@
 use crate::common_tables::SIN_TABLE;
 
 #[derive(Debug)]
-pub struct SinCos{
-	pub sin: i32,
-	pub cos:i32
+pub struct SinCos<T>{
+	pub sin: T,
+	pub cos:T
 }
 
 const DN: i32 = 0x1921FB5; // delta between the two points (fixed), in this case 2*pi/FAST_MATH_TABLE_SIZE
@@ -34,8 +34,8 @@ fn multiply(a: i32, b: i32) -> i64 {
 	i64::from(a) * i64::from(b)
 }
 
-impl SinCos{
-	pub fn from_theta(theta: i32) -> Self{
+impl SinCos <i32>{
+	pub fn from_theta(theta: i32) -> Self {
 		/* Calculate the nearest index */
 	  	let index_s:u16 = ((theta as u32) >> CONTROLLER_Q31_SHIFT) as u16;
 	  	let index_c:u16 = (index_s + 128) & 0x1ff;
@@ -90,5 +90,12 @@ impl SinCos{
 		let cos: i32 = (tmp >> 31) as i32;
 
 		Self{sin, cos}
+	}
+}
+
+impl SinCos <f32>{
+	pub fn from_theta(theta: f32) -> Self {
+		let sin_cos = theta.sin_cos();
+		Self{sin:sin_cos.0, cos:sin_cos.1}
 	}
 }

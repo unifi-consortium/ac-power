@@ -54,7 +54,7 @@ impl Abc <i32>{
 	}
 
 	// DQ0 Transform
-	pub fn to_dq0(self, sin_cos: SinCos) -> Dq0<i32> {
+	pub fn to_dq0(self, sin_cos: SinCos<i32>) -> Dq0<i32> {
 		
 		/* sin and cos with 120 degree offsets */
 		let sin_cos_shift_right = sin_cos.shift_right_120();
