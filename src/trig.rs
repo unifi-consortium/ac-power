@@ -6,7 +6,6 @@ pub struct SinCos{
 	pub cos:i32
 }
 
-
 const DN: i32 = 0x1921FB5; // delta between the two points (fixed), in this case 2*pi/FAST_MATH_TABLE_SIZE
 const CONTROLLER_Q31_SHIFT: u32 = 32 - 9;
 
@@ -61,6 +60,9 @@ impl SinCos{
 		Self{sin, cos}
 	}
 
+	/// Shifts sin/cos values 120 degrees right (+2pi/3)
+	///
+	/// Use Ptolemy's theorem rather than a new sin/cos lookup
 	pub fn shift_right_120(&self) -> Self {
 
 		let mut tmp: i64 = multiply(self.sin, -1073741824);
@@ -74,6 +76,9 @@ impl SinCos{
 		Self{sin, cos}
 	}
 
+	/// Shifts sin/cos values 120 degrees left (-2pi/3)
+	///
+	/// Use Ptolemy's theorem rather than a new sin/cos lookup
 	pub fn shift_left_120(&self) -> Self {
 
 		let mut tmp: i64 = multiply(self.sin, -1073741824);

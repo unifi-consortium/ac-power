@@ -2,29 +2,28 @@ use crate::trig::SinCos;
 
 // alpha beta
 #[derive(Debug)]
-pub struct AlphaBeta{
-	pub alpha: i32,
-	pub beta: i32,
-	pub gamma: i32
+pub struct AlphaBeta<T>{
+	pub alpha: T,
+	pub beta: T,
+	pub gamma: T
 }
 
 
 // abc
 #[derive(Debug)]
-pub struct Abc{
-	pub a: i32,
-	pub b: i32,
-	pub c: i32
+pub struct Abc<T>{
+	pub a: T,
+	pub b: T,
+	pub c: T
 }
 
 // dq0
 #[derive(Debug)]
-pub struct Dq0{
-	pub d: i32,
-	pub q: i32,
-	pub z: i32
+pub struct Dq0<T>{
+	pub d: T,
+	pub q: T,
+	pub z: T
 }
-
 
 #[inline(always)]
 fn multiply(a: i32, b: i32) -> i64 {
@@ -32,28 +31,30 @@ fn multiply(a: i32, b: i32) -> i64 {
 }
 
 
-impl Abc {
-	// Clark Transform
-	pub fn to_alpha_beta(self) -> AlphaBeta {
+
+impl Abc <i32>{
+	// Fixed-point clark transform
+	pub fn to_alpha_beta(self) -> AlphaBeta<i32>
+	{
 		let mut tmp: i64 = multiply(self.a, 0x55555555);
 		tmp -= multiply(self.b, 0x2aaaaaab);
 		tmp -= multiply(self.c, 0x2aaaaaab);
-		let alpha: i32 = (tmp >> 32) as i32;
+		let alpha: i32 = (tmp >> 31) as i32;
 
-		tmp = multiply(self.b, 0x49e69d16);
-		tmp -= multiply(self.c, 0x49e69d16);
-		let beta: i32 = (tmp >> 32) as i32;
+		tmp = multiply(self.b, 0x6882f5c0);
+		tmp -= multiply(self.c, 0x6882f5c0);
+		let beta: i32 = (tmp >> 31) as i32;
 
 		tmp = multiply(self.a, 0x2aaaaaab);
 		tmp += multiply(self.b, 0x2aaaaaab);
 		tmp += multiply(self.c, 0x2aaaaaab);
-		let gamma: i32 = (tmp >> 32) as i32;
+		let gamma: i32 = (tmp >> 31) as i32;
 
 		AlphaBeta{alpha, beta, gamma}
 	}
 
 	// DQ0 Transform
-	pub fn to_dq0(self, sin_cos: SinCos) -> Dq0 {
+	pub fn to_dq0(self, sin_cos: SinCos) -> Dq0<i32> {
 		
 		/* sin and cos with 120 degree offsets */
 		let sin_cos_shift_right = sin_cos.shift_right_120();
@@ -78,5 +79,19 @@ impl Abc {
 		let z = (tmp >> 32) as i32;
 
 		Dq0{d, q, z}
+	}
+}
+
+
+impl Abc <f32>{
+	// Fixed-point clark transform
+	pub fn to_alpha_beta(self) -> AlphaBeta<f32>
+	{
+
+		let alpha: f32 = 0.666666666666*self.a - 0.333333333333*self.b - 0.333333333333*self.c;
+		let beta: f32 = 0.816496580928*self.b - 0.816496580928*self.c;
+		let gamma: f32 = 0.333333333333*self.a + 0.333333333333*self.b + 0.333333333333*self.c;
+		
+		AlphaBeta{alpha, beta, gamma}
 	}
 }

@@ -7,23 +7,39 @@ pub mod common_tables;
 mod tests {
 
     use crate::trig::SinCos;
-    use crate::transforms::{Abc, AlphaBeta, Dq0};
+    use crate::transforms::Abc;
+
+    // define a simple macro for comparing floating point numbers
+    macro_rules! assert_delta {
+        ($x:expr, $y:expr, $d:expr) => {
+            if !($x - $y < $d || $y - $x < $d) { panic!(); }
+        }
+    }
 
     #[test]
     fn clark_transform() {
-        let abc = Abc {a:3827, b:6088, c:-9914};
-        let alpha_beta: AlphaBeta = abc.to_alpha_beta();
-        assert_eq!(alpha_beta.alpha, 1913);
-        assert_eq!(alpha_beta.beta, 4619);
+        // test fixed-point
+        let abc: Abc<i32> = Abc {a:3827, b:6088, c:-9914};
+        let alpha_beta = abc.to_alpha_beta();
+        assert_eq!(alpha_beta.alpha, 3826);
+        assert_eq!(alpha_beta.beta, 13065);
         assert_eq!(alpha_beta.gamma, 0);
+
+        // test floating-point
+        let abc: Abc<f32> = Abc{a: 3827.0, b:6088.0, c:-9914.0};
+        let alpha_beta = abc.to_alpha_beta();
+        println!("alpha_beta -> {:?}", alpha_beta);
+        assert_delta!(alpha_beta.alpha, 3826.667, 1e-10);
+        assert_delta!(alpha_beta.beta, 13065.579, 1e-10);
+        assert_delta!(alpha_beta.gamma, 0.33325195, 1e-10);
     }
 
     #[test]
     fn dq0_transform() {
  
-        let abc = Abc {a:0, b:-86603, c:86603};
+        let abc: Abc<i32> = Abc {a:0, b:-86603, c:86603};
         let sin_cos = SinCos::from_theta(0);
-        let dq0: Dq0 = abc.to_dq0(sin_cos);
+        let dq0 = abc.to_dq0(sin_cos);
         assert_eq!(dq0.d, 100000);
         assert_eq!(dq0.q, 0);
         assert_eq!(dq0.z, 0);
