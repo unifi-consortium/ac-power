@@ -7,5 +7,6 @@ edition = "2018"
 
 [dependencies]
 fixed = "1.10.0"
+typenum = "1.14.0"
 
 [dev-dependencies]

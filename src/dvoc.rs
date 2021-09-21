@@ -1,41 +1,49 @@
 use crate::trig::SinCos;
 
-pub struct Dvoc {
-	pub v_alpha: i32,
-	pub v_beta: i32,
-	pub theta: i32,
+pub struct Dvoc<F, V, I> {
+	// state variables
 	pub v: i32,
-	pub r: SinCos,
+	pub theta: i32,
 
-	// private constants
-	K0: i32,
-	K1: i32,
+	// secondary control biases
+	pub omega_bias: <F>,
+	pub v_bias: <V>,
 
+	// tertiary control biases
+	pub ia_bias: <I>,
+	pub ir_bias: <I>
 }
 
 
 
 impl Dvoc {
-	pub fn new() -> Self {
+	pub fn new(eps: f32,
+		       k_v: f32,
+		       k_i: f32,
+		       v_nom: f32,
+		       omega_nom:f32,
+		       l:f32,
+		       c:f32,
+		       dt:f32) -> Self {
+
+		// calculated constants
+		// 683_565_275.5764316 = 1<< 31 / pi
+		let k0: i32 = (omega_nom * dt * 683_565_275.5764316) as i32;
+
+
+
+
 
 	}
 
 
-	pub fn step(&self, ia:i32, ir:i32) {
+	// step the the oscillator by step dts
+	pub fn step(&self, step:u16) {
 
-		let ia_error = self.ia - ia;
-		let ir_error = self.ir - ir;
-		let mut d: i64 = multiply(self.r.sin, ir_error);
-		d += multiply(self.r.cos, ia_error);
-		d = tmp >> 31;
-		d = multiply(tmp, K2);
+		// update theta
+		let mut d_theta: i32 = multiply(self.k0, step);
 
-
-		let x0_squared: i32 = multiply(self.x0, self.x0);
-		let p = (K1 - (x0_squared<<1))>>32;
-		p = multiply(p, K0) >> 32;
-		p = multiply(p, self.x0) >> 32;
-
-		dx0dt = p - d;
 	}
+
+	pub 
 }
