@@ -43,6 +43,7 @@ where Frac: LeEqU32 {
 		let sin_cos = SinCos::from_theta(theta);
 		let minus = sin_cos.shift_left_120();
 		let plus = sin_cos.shift_right_120();
+
 		let mut a = amplitude;
 		let mut b = amplitude;
 		let mut c = amplitude;
@@ -94,7 +95,6 @@ where Frac: LeEqU32 {
 		z *= ONE_THIRD;
 		z.saturating_mul_acc(self.b, ONE_THIRD);
 		z.saturating_mul_acc(self.c, ONE_THIRD);
-		z *= TWO_THIRDS;
 
 		Dq0{d, q, z}
 	}
@@ -106,7 +106,6 @@ mod tests {
 
     use crate::trig::SinCos;
     use crate::transforms::Abc;
-
 
     use fixed::types::{I1F31,
                        I11F21	// 1 sine bit and 10 integer bits allows up to 1kV

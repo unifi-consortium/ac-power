@@ -10,8 +10,9 @@ pub struct SinCos{
 const DN: i32 = 0x1921FB5; // delta between the two points (fixed), in this case 2*pi/FAST_MATH_TABLE_SIZE
 const CONTROLLER_Q31_SHIFT: u32 = 32 - 9;
 
-const ZP500:I1F31 = I1F31::from_bits(0x4000_0000);
-const ZP866:I1F31 = I1F31::from_bits(0x6ed9_eba1);
+const ONE_HALF:I1F31 = I1F31::from_bits(0x4000_0000);
+const SQRT_3_OVER_2:I1F31 = I1F31::from_bits(0x6ed9_eba1);
+
 
 #[inline(always)]
 fn clip_i64_to_i32(x: i64) -> i32{
@@ -64,11 +65,11 @@ impl SinCos {
 	/// Use Ptolemy's theorem rather than a new sin/cos lookup
 	pub fn shift_right_120(&self) -> Self {
 
-		let mut sin = self.sin * (-ZP500);
-		sin.saturating_mul_acc(ZP866, self.cos);
+		let mut sin = self.sin * (-ONE_HALF);
+		sin.saturating_mul_acc(SQRT_3_OVER_2, self.cos);
 
-		let mut cos = self.cos * (-ZP500);
-		cos.saturating_mul_acc(-ZP866, self.sin);
+		let mut cos = self.cos * (-ONE_HALF);
+		cos.saturating_mul_acc(-SQRT_3_OVER_2, self.sin);
 
 		Self{sin, cos}
 	}
@@ -78,11 +79,11 @@ impl SinCos {
 	/// Use Ptolemy's theorem rather than a new sin/cos lookup
 	pub fn shift_left_120(&self) -> Self {
 
-		let mut sin = self.sin * (-ZP500);
-		sin.saturating_mul_acc(-ZP866, self.cos);
+		let mut sin = self.sin * (-ONE_HALF);
+		sin.saturating_mul_acc(-SQRT_3_OVER_2, self.cos);
 
-		let mut cos = self.cos * (-ZP500);
-		cos.saturating_mul_acc(ZP866, self.sin);
+		let mut cos = self.cos * (-ONE_HALF);
+		cos.saturating_mul_acc(SQRT_3_OVER_2, self.sin);
 
 		Self{sin, cos}
 	}
