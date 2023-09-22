@@ -1,6 +1,5 @@
 #![cfg_attr(not(test), no_std)]
 
-pub mod common_tables;
 pub mod transforms;
 pub mod trig;
 

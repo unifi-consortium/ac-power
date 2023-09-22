@@ -50,14 +50,26 @@ impl SinCos {
 mod tests {
 
     use super::*;
+    use approx::assert_abs_diff_eq;
+
+    use std::f64::consts::PI;
 
     #[test]
     fn shift_left() {
-        let angle = 0.2;
+        let angle: f64 = 0.2;
         let sin_cos = SinCos::from_theta(I1F31::from_num(angle));
         let sin_cos_shift_left = sin_cos.shift_left_120();
-        assert_eq!(sin_cos_shift_left.sin, I1F31::from_num(-0.994521895));
-        assert_eq!(sin_cos_shift_left.cos, I1F31::from_num(0.104528463));
+
+        assert_abs_diff_eq!(
+            f64::from(sin_cos_shift_left.sin),
+            (PI * angle - 2.0 * PI / 3.0).sin(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(sin_cos_shift_left.cos),
+            (PI * angle - 2.0 * PI / 3.0).cos(),
+            epsilon = 0.0001
+        );
     }
 
     #[test]
@@ -65,7 +77,16 @@ mod tests {
         let angle = 0.2;
         let sin_cos = SinCos::from_theta(I1F31::from_num(angle));
         let sin_cos_shift_right = sin_cos.shift_right_120();
-        assert_eq!(sin_cos_shift_right.sin, I1F31::from_num(0.406736642));
-        assert_eq!(sin_cos_shift_right.cos, I1F31::from_num(-0.9135454576));
+
+        assert_abs_diff_eq!(
+            f64::from(sin_cos_shift_right.sin),
+            (PI * angle + 2.0 * PI / 3.0).sin(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(sin_cos_shift_right.cos),
+            (PI * angle + 2.0 * PI / 3.0).cos(),
+            epsilon = 0.0001
+        );
     }
 }
