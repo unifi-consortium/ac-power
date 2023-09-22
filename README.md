@@ -11,6 +11,15 @@ The crate has 4 data types to represent 4 different reference frames for AC powe
 3.  AlphaBeta - Stationary reference frame
 4.  Dq0 - Rotating reference frame
 
+All data types are based on integer data types using the [fixed](https://crates.io/crates/fixed) crate.  This was done for a few reasons.
+
+1.  Speed.  Calculations are fast even on microcontrollers that do not have a dedicated FPU.
+2.  Consistency.  Calculations will yield the exact same results regardless of platform.
+3.  Logical full scale.  Trig functions like sin/cos benefit from data types which are naturally constrainted to +-1
+4.  Natural wrap around (modulo) at the integer overflow: critical for phase/frequency applications used in ac power analysus.
+
+Use of the [fixed](https://crates.io/crates/fixed) crate provides zero-cost abstractions which removes a lot of the pain points typically associated with using fixed-point arithmetic such as keeping track of the fractional bits and converting to/from floating point.
+
 # Example Usage
 
 ```rust
