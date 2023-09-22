@@ -121,6 +121,7 @@ mod tests {
     use crate::transforms::{Abc, AlphaBeta, Polar};
     use crate::trig::SinCos;
 
+    use approx::assert_relative_eq;
     use fixed::types::extra::*;
     use fixed::types::{
         I11F21, // 1 sine bit and 10 integer bits allows up to 1kV
@@ -140,9 +141,9 @@ mod tests {
         // we loose a little precision in the transform
         // I think most of this is in the sin/cos shifts
         // TODO:  Can we make this better?
-        assert_eq!(alpha_beta.alpha, I11F21::from_num(83.3511243));
-        assert_eq!(alpha_beta.beta, I11F21::from_num(-472.7077217));
-        assert_eq!(alpha_beta.gamma, I11F21::from_num(-0.000001));
+        assert_relative_eq!(f64::from(alpha_beta.alpha), 83.34947681427002);
+        assert_relative_eq!(f64::from(alpha_beta.beta), -472.70061111450195);
+        assert_relative_eq!(f64::from(alpha_beta.gamma), -1.430511474609375e-6);
     }
 
     #[test]
