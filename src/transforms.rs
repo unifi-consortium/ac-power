@@ -1,4 +1,4 @@
-use crate::trig::SinCos;
+use crate::trig::{shift_left_120, shift_right_120, sin_cos};
 use core::convert::From;
 use fixed::types::extra::LeEqU32;
 use fixed::types::I1F31;
@@ -46,16 +46,16 @@ where
     Frac: LeEqU32,
 {
     fn from(polar: Polar<Frac>) -> Self {
-        let sin_cos = SinCos::from_theta(polar.theta);
-        let minus = sin_cos.shift_left_120();
-        let plus = sin_cos.shift_right_120();
+        let (sin, cos) = sin_cos(polar.theta);
+        let (sin_m, _) = shift_left_120(sin, cos);
+        let (sin_p, _) = shift_right_120(sin, cos);
 
         let mut a = polar.amplitude;
         let mut b = polar.amplitude;
         let mut c = polar.amplitude;
-        a *= sin_cos.sin;
-        b *= minus.sin;
-        c *= plus.sin;
+        a *= sin;
+        b *= sin_m;
+        c *= sin_p;
         Self { a, b, c }
     }
 }
@@ -89,21 +89,21 @@ where
     Frac: LeEqU32,
 {
     // DQ0 Transform
-    pub fn to_dq0(&self, sin_cos: SinCos) -> Dq0<Frac> {
+    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<Frac> {
         /* sin and cos with 120 degree offsets */
-        let sin_cos_shift_right = sin_cos.shift_right_120();
-        let sin_cos_shift_left = sin_cos.shift_left_120();
+        let (sin_m, cos_m) = shift_left_120(sin, cos);
+        let (sin_p, cos_p) = shift_right_120(sin, cos);
 
         let mut d = self.a;
-        d *= sin_cos.sin;
-        d.saturating_mul_acc(self.b, sin_cos_shift_left.sin);
-        d.saturating_mul_acc(self.c, sin_cos_shift_right.sin);
+        d *= sin;
+        d.saturating_mul_acc(self.b, sin_m);
+        d.saturating_mul_acc(self.c, sin_p);
         d *= TWO_THIRDS;
 
         let mut q = self.a;
-        q *= sin_cos.cos;
-        q.saturating_mul_acc(self.b, sin_cos_shift_left.cos);
-        q.saturating_mul_acc(self.c, sin_cos_shift_right.cos);
+        q *= cos;
+        q.saturating_mul_acc(self.b, cos_m);
+        q.saturating_mul_acc(self.c, cos_p);
         q *= TWO_THIRDS;
 
         let mut z = self.a;
@@ -118,8 +118,7 @@ where
 #[cfg(test)]
 mod tests {
 
-    use crate::transforms::{Abc, AlphaBeta, Polar};
-    use crate::trig::SinCos;
+    use super::*;
 
     use approx::assert_relative_eq;
     use fixed::types::extra::*;
@@ -153,8 +152,8 @@ mod tests {
         let polar = Polar { theta, amplitude };
         let abc = Abc::from(polar);
 
-        let sin_cos = SinCos::from_theta(theta);
-        let dq0 = abc.to_dq0(sin_cos);
+        let (sin, cos) = sin_cos(theta);
+        let dq0 = abc.to_dq0(sin, cos);
 
         println!("{:?}", dq0);
         // // we loose a little precision in the transform

@@ -1,49 +1,44 @@
 use fixed::types::I1F31;
 use idsp::cossin;
 
-#[derive(Debug)]
-pub struct SinCos {
-    pub sin: I1F31,
-    pub cos: I1F31,
-}
-
 const ONE_HALF: I1F31 = I1F31::from_bits(0x4000_0000);
 const SQRT_3_OVER_2: I1F31 = I1F31::from_bits(0x6ed9_eba1);
 
-impl SinCos {
-    pub fn from_theta(theta: I1F31) -> Self {
-        let (cos_i32, sin_i32) = cossin(theta.to_bits());
-        let sin = I1F31::from_bits(sin_i32);
-        let cos = I1F31::from_bits(cos_i32);
+pub fn sin_cos(theta: I1F31) -> (I1F31, I1F31) {
+    // use the idsp library cos/sin function
+    let (cos_i32, sin_i32) = cossin(theta.to_bits());
 
-        Self { sin, cos }
-    }
+    // convert the result to fixed datatype
+    let sin_val = I1F31::from_bits(sin_i32);
+    let cos_val = I1F31::from_bits(cos_i32);
 
-    /// Shifts sin/cos values 120 degrees right (+2pi/3)
-    ///
-    /// Use Ptolemy's theorem rather than a new sin/cos lookup
-    pub fn shift_right_120(&self) -> Self {
-        let mut sin = self.sin * (-ONE_HALF);
-        sin.saturating_mul_acc(SQRT_3_OVER_2, self.cos);
+    (sin_val, cos_val)
+}
 
-        let mut cos = self.cos * (-ONE_HALF);
-        cos.saturating_mul_acc(-SQRT_3_OVER_2, self.sin);
+/// Shifts sin/cos values 120 degrees right (+2pi/3)
+///
+/// Use Ptolemy's theorem rather than a new sin/cos lookup
+pub fn shift_right_120(sin: I1F31, cos: I1F31) -> (I1F31, I1F31) {
+    let mut sin_shifted = sin * (-ONE_HALF);
+    sin_shifted.saturating_mul_acc(SQRT_3_OVER_2, cos);
 
-        Self { sin, cos }
-    }
+    let mut cos_shifted = cos * (-ONE_HALF);
+    cos_shifted.saturating_mul_acc(-SQRT_3_OVER_2, sin);
 
-    /// Shifts sin/cos values 120 degrees left (-2pi/3)
-    ///
-    /// Use Ptolemy's theorem rather than a new sin/cos lookup
-    pub fn shift_left_120(&self) -> Self {
-        let mut sin = self.sin * (-ONE_HALF);
-        sin.saturating_mul_acc(-SQRT_3_OVER_2, self.cos);
+    (sin_shifted, cos_shifted)
+}
 
-        let mut cos = self.cos * (-ONE_HALF);
-        cos.saturating_mul_acc(SQRT_3_OVER_2, self.sin);
+/// Shifts sin/cos values 120 degrees left (-2pi/3)
+///
+/// Use Ptolemy's theorem rather than a new sin/cos lookup
+pub fn shift_left_120(sin: I1F31, cos: I1F31) -> (I1F31, I1F31) {
+    let mut sin_shifted = sin * (-ONE_HALF);
+    sin_shifted.saturating_mul_acc(-SQRT_3_OVER_2, cos);
 
-        Self { sin, cos }
-    }
+    let mut cos_shifted = cos * (-ONE_HALF);
+    cos_shifted.saturating_mul_acc(SQRT_3_OVER_2, sin);
+
+    (sin_shifted, cos_shifted)
 }
 
 #[cfg(test)]
@@ -57,16 +52,16 @@ mod tests {
     #[test]
     fn shift_left() {
         let angle: f64 = 0.2;
-        let sin_cos = SinCos::from_theta(I1F31::from_num(angle));
-        let sin_cos_shift_left = sin_cos.shift_left_120();
+        let (sin, cos) = sin_cos(I1F31::from_num(angle));
+        let (sin_shifted, cos_shifted) = shift_left_120(sin, cos);
 
         assert_abs_diff_eq!(
-            f64::from(sin_cos_shift_left.sin),
+            f64::from(sin_shifted),
             (PI * angle - 2.0 * PI / 3.0).sin(),
             epsilon = 0.0001
         );
         assert_abs_diff_eq!(
-            f64::from(sin_cos_shift_left.cos),
+            f64::from(cos_shifted),
             (PI * angle - 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
@@ -74,17 +69,17 @@ mod tests {
 
     #[test]
     fn shift_right() {
-        let angle = 0.2;
-        let sin_cos = SinCos::from_theta(I1F31::from_num(angle));
-        let sin_cos_shift_right = sin_cos.shift_right_120();
+        let angle: f64 = 0.2;
+        let (sin, cos) = sin_cos(I1F31::from_num(angle));
+        let (sin_shifted, cos_shifted) = shift_right_120(sin, cos);
 
         assert_abs_diff_eq!(
-            f64::from(sin_cos_shift_right.sin),
+            f64::from(sin_shifted),
             (PI * angle + 2.0 * PI / 3.0).sin(),
             epsilon = 0.0001
         );
         assert_abs_diff_eq!(
-            f64::from(sin_cos_shift_right.cos),
+            f64::from(cos_shifted),
             (PI * angle + 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
