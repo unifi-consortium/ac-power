@@ -1,13 +1,9 @@
+use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
 use crate::reference_frames::{Abc, AlphaBeta, Dq0, Polar};
 use crate::trig::{shift_left_120, shift_right_120, sin_cos};
 use core::convert::From;
 use fixed::types::extra::LeEqU32;
 use fixed::types::I1F31;
-
-// define constants
-const ONE_THIRD: I1F31 = I1F31::from_bits(0x2aaa_aaab);
-const TWO_THIRDS: I1F31 = I1F31::from_bits(0x5555_5555);
-const SQRT_3_OVER_3: I1F31 = I1F31::from_bits(0x49e6_9d16);
 
 // polar to Abc transformation
 impl<Frac> From<Polar<Frac>> for Abc<Frac>
