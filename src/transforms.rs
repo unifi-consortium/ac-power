@@ -2,15 +2,11 @@ use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
 use crate::reference_frames::{Abc, AlphaBeta, Dq0, Polar};
 use crate::trig::{shift_left_120, shift_right_120, sin_cos};
 use core::convert::From;
-use fixed::types::extra::LeEqU32;
 use fixed::types::I1F31;
 
 // polar to Abc transformation
-impl<Frac> From<Polar<Frac>> for Abc<Frac>
-where
-    Frac: LeEqU32,
-{
-    fn from(polar: Polar<Frac>) -> Self {
+impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
+    fn from(polar: Polar<FRAC>) -> Self {
         let (sin, cos) = sin_cos(polar.theta);
         let (sin_m, _) = shift_left_120(sin, cos);
         let (sin_p, _) = shift_right_120(sin, cos);
@@ -26,11 +22,8 @@ where
 }
 
 // abc to alpha beta (clark) transform
-impl<Frac> From<Abc<Frac>> for AlphaBeta<Frac>
-where
-    Frac: LeEqU32,
-{
-    fn from(abc: Abc<Frac>) -> Self {
+impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
+    fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
         alpha *= TWO_THIRDS;
         alpha.saturating_mul_acc(abc.b, -ONE_THIRD);
@@ -49,12 +42,9 @@ where
     }
 }
 
-impl<Frac> Abc<Frac>
-where
-    Frac: LeEqU32,
-{
+impl<const FRAC: i32> Abc<FRAC> {
     // DQ0 Transform
-    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<Frac> {
+    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
         /* sin and cos with 120 degree offsets */
         let (sin_m, cos_m) = shift_left_120(sin, cos);
         let (sin_p, cos_p) = shift_right_120(sin, cos);
@@ -86,7 +76,7 @@ mod tests {
     use super::*;
 
     use approx::assert_relative_eq;
-    use fixed::types::extra::*;
+
     use fixed::types::{
         I11F21, // 1 sine bit and 10 integer bits allows up to 1kV
         I1F31,
@@ -113,7 +103,7 @@ mod tests {
     #[test]
     fn dq0_transform() {
         let theta = I1F31::from_num(20. / 360.);
-        let amplitude = FixedI32::<U5>::from_num(12e3);
+        let amplitude = FixedI32::<5>::from_num(12e3);
         let polar = Polar { theta, amplitude };
         let abc = Abc::from(polar);
 

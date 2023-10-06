@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-fixed = "1.24.0"
+fixed = {git="https://gitlab.com/tspiteri/fixed.git", tag="v2.0.0-alpha.12"}
 idsp = "0.11.0"
 
 [dev-dependencies]
