@@ -1,44 +1,13 @@
+use crate::reference_frames::{Abc, AlphaBeta, Dq0, Polar};
 use crate::trig::{shift_left_120, shift_right_120, sin_cos};
 use core::convert::From;
 use fixed::types::extra::LeEqU32;
 use fixed::types::I1F31;
-use fixed::FixedI32;
 
 // define constants
 const ONE_THIRD: I1F31 = I1F31::from_bits(0x2aaa_aaab);
 const TWO_THIRDS: I1F31 = I1F31::from_bits(0x5555_5555);
 const SQRT_3_OVER_3: I1F31 = I1F31::from_bits(0x49e6_9d16);
-
-// alpha beta
-#[derive(Debug)]
-pub struct AlphaBeta<Frac: LeEqU32> {
-    pub alpha: FixedI32<Frac>,
-    pub beta: FixedI32<Frac>,
-    pub gamma: FixedI32<Frac>,
-}
-
-// abc
-#[derive(Debug)]
-pub struct Abc<Frac: LeEqU32> {
-    pub a: FixedI32<Frac>,
-    pub b: FixedI32<Frac>,
-    pub c: FixedI32<Frac>,
-}
-
-// dq0
-#[derive(Debug)]
-pub struct Dq0<Frac: LeEqU32> {
-    pub d: FixedI32<Frac>,
-    pub q: FixedI32<Frac>,
-    pub z: FixedI32<Frac>,
-}
-
-// polar
-#[derive(Debug)]
-pub struct Polar<Frac: LeEqU32> {
-    pub amplitude: FixedI32<Frac>,
-    pub theta: I1F31,
-}
 
 // polar to Abc transformation
 impl<Frac> From<Polar<Frac>> for Abc<Frac>
