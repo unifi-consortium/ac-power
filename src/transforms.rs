@@ -21,7 +21,7 @@ impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
     }
 }
 
-// abc to alpha beta (clark) transform
+// abc to alpha beta (clarke) transform
 impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
@@ -67,6 +67,32 @@ impl<const FRAC: i32> Abc<FRAC> {
         z.saturating_mul_acc(self.c, ONE_THIRD);
 
         Dq0 { d, q, z }
+    }
+}
+
+impl<const FRAC: i32> Dq0<FRAC> {
+    // DQ0 Transform
+    pub fn to_abc(&self, sin: I1F31, cos: I1F31) -> Abc<FRAC> {
+        /* sin and cos with 120 degree offsets */
+        let (sin_m, cos_m) = shift_left_120(sin, cos);
+        let (sin_p, cos_p) = shift_right_120(sin, cos);
+
+        let mut a = self.d;
+        a *= cos;
+        a.saturating_mul_acc(self.q, -sin);
+        a = a.saturating_add(self.z);
+
+        let mut b = self.d;
+        b *= cos_m;
+        b.saturating_mul_acc(self.q, -sin_m);
+        b = b.saturating_add(self.z);
+
+        let mut c = self.d;
+        c *= cos_p;
+        c.saturating_mul_acc(self.q, -sin_p);
+        c = c.saturating_add(self.z);
+
+        Abc { a, b, c }
     }
 }
 
