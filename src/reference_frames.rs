@@ -1,34 +1,33 @@
-use fixed::types::extra::LeEqU32;
 use fixed::types::I1F31;
 use fixed::FixedI32;
 
 // alpha beta
 #[derive(Debug)]
-pub struct AlphaBeta<Frac: LeEqU32> {
-    pub alpha: FixedI32<Frac>,
-    pub beta: FixedI32<Frac>,
-    pub gamma: FixedI32<Frac>,
+pub struct AlphaBeta<const FRAC: i32> {
+    pub alpha: FixedI32<FRAC>,
+    pub beta: FixedI32<FRAC>,
+    pub gamma: FixedI32<FRAC>,
 }
 
 // abc
 #[derive(Debug)]
-pub struct Abc<Frac: LeEqU32> {
-    pub a: FixedI32<Frac>,
-    pub b: FixedI32<Frac>,
-    pub c: FixedI32<Frac>,
+pub struct Abc<const FRAC: i32> {
+    pub a: FixedI32<FRAC>,
+    pub b: FixedI32<FRAC>,
+    pub c: FixedI32<FRAC>,
 }
 
 // dq0
 #[derive(Debug)]
-pub struct Dq0<Frac: LeEqU32> {
-    pub d: FixedI32<Frac>,
-    pub q: FixedI32<Frac>,
-    pub z: FixedI32<Frac>,
+pub struct Dq0<const FRAC: i32> {
+    pub d: FixedI32<FRAC>,
+    pub q: FixedI32<FRAC>,
+    pub z: FixedI32<FRAC>,
 }
 
 // polar
 #[derive(Debug)]
-pub struct Polar<Frac: LeEqU32> {
-    pub amplitude: FixedI32<Frac>,
+pub struct Polar<const FRAC: i32> {
+    pub amplitude: FixedI32<FRAC>,
     pub theta: I1F31,
 }
