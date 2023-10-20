@@ -9,15 +9,26 @@ pub mod trig;
 mod tests {
 
     // use fixed::types::extra::*;
-    // use fixed::FixedI16;
-    use fixed::types::{I11F21, I1F31};
+    use fixed::FixedI32;
 
     #[test]
     fn play_with_fixed() {
-        let a = I1F31::from_num(0.768);
-        let b = I11F21::from_num(400.0);
+        let a = FixedI32::<45>::from_num(1.5e-9);
+        let b = FixedI32::<45>::from_num(100e-9);
+        let c = a.wide_mul(b);
 
         println!("{:?}", a);
         println!("{:?}", b);
+        println!("{:?}", c);
+        println!("{:?}", a.to_bits());
+        println!("{:?}", b.to_bits());
+        println!("{:?}", c.to_bits());
+
+        println!("{:?}", 1.5e-9);
+        println!("{:?}", 100e-9);
+        println!("{:?}", 1.5e-9 * 100e-9);
+        println!("{:?}", a.to_bits());
+        println!("{:?}", b.to_bits());
+        println!("{:?}", c.to_bits());
     }
 }
