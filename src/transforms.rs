@@ -42,6 +42,24 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
     }
 }
 
+// alpha-beta to dq0 (park) transform
+impl<const FRAC: i32> AlphaBeta<FRAC> {
+    // DQ0 Transform
+    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
+        let mut d = self.alpha;
+        d *= sin;
+        d.saturating_mul_acc(-self.beta, cos);
+
+        let mut q = self.alpha;
+        q *= cos;
+        q.saturating_mul_acc(self.beta, sin);
+
+        let z = self.gamma;
+
+        Dq0 { d, q, z }
+    }
+}
+
 impl<const FRAC: i32> Abc<FRAC> {
     // DQ0 Transform
     pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
