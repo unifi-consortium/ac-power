@@ -78,18 +78,18 @@ impl<const FRAC: i32> Dq0<FRAC> {
         let (sin_p, cos_p) = shift_right_120(sin, cos);
 
         let mut a = self.d;
-        a *= cos;
-        a.saturating_mul_acc(self.q, -sin);
+        a *= sin;
+        a.saturating_mul_acc(self.q, cos);
         a = a.saturating_add(self.z);
 
         let mut b = self.d;
-        b *= cos_m;
-        b.saturating_mul_acc(self.q, -sin_m);
+        b *= sin_m;
+        b.saturating_mul_acc(self.q, cos_m);
         b = b.saturating_add(self.z);
 
         let mut c = self.d;
-        c *= cos_p;
-        c.saturating_mul_acc(self.q, -sin_p);
+        c *= sin_p;
+        c.saturating_mul_acc(self.q, cos_p);
         c = c.saturating_add(self.z);
 
         Abc { a, b, c }
