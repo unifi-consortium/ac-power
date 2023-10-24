@@ -42,6 +42,24 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
     }
 }
 
+// alpha-beta to dq0 (park) transform
+impl<const FRAC: i32> AlphaBeta<FRAC> {
+    // DQ0 Transform
+    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
+        let mut d = self.alpha;
+        d *= sin;
+        d.saturating_mul_acc(-self.beta, cos);
+
+        let mut q = self.alpha;
+        q *= cos;
+        q.saturating_mul_acc(self.beta, sin);
+
+        let z = self.gamma;
+
+        Dq0 { d, q, z }
+    }
+}
+
 impl<const FRAC: i32> Abc<FRAC> {
     // DQ0 Transform
     pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
@@ -78,18 +96,18 @@ impl<const FRAC: i32> Dq0<FRAC> {
         let (sin_p, cos_p) = shift_right_120(sin, cos);
 
         let mut a = self.d;
-        a *= cos;
-        a.saturating_mul_acc(self.q, -sin);
+        a *= sin;
+        a.saturating_mul_acc(self.q, cos);
         a = a.saturating_add(self.z);
 
         let mut b = self.d;
-        b *= cos_m;
-        b.saturating_mul_acc(self.q, -sin_m);
+        b *= sin_m;
+        b.saturating_mul_acc(self.q, cos_m);
         b = b.saturating_add(self.z);
 
         let mut c = self.d;
-        c *= cos_p;
-        c.saturating_mul_acc(self.q, -sin_p);
+        c *= sin_p;
+        c.saturating_mul_acc(self.q, cos_p);
         c = c.saturating_add(self.z);
 
         Abc { a, b, c }
