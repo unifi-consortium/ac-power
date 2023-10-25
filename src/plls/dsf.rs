@@ -33,6 +33,16 @@ pub struct Telemetry {
     pub q_pos: i32,
     pub d_neg: i32,
     pub q_neg: i32,
+
+    pub d_pos_hat: i32,
+    pub q_pos_hat: i32,
+    pub d_neg_hat: i32,
+    pub q_neg_hat: i32,
+
+    pub d_pos_bar: i32,
+    pub q_pos_bar: i32,
+    pub d_neg_bar: i32,
+    pub q_neg_bar: i32,
 }
 
 impl<const FRAC: i32> Dsf<FRAC> {
@@ -81,7 +91,7 @@ impl<const FRAC: i32> Dsf<FRAC> {
         self.q_neg_bar.update(q_pos_hat);
 
         // PI control loop
-        let f = self.fref + self.filter.update(dq_pos.q);
+        let f = self.fref + self.filter.update(q_pos_hat);
 
         // update the phase info
         self.theta = self.theta.wrapping_add(f);
@@ -100,6 +110,16 @@ impl<const FRAC: i32> Dsf<FRAC> {
             q_pos: dq_pos.q.to_bits(),
             d_neg: dq_neg.d.to_bits(),
             q_neg: dq_neg.q.to_bits(),
+
+            d_pos_hat: d_pos_hat.to_bits(),
+            q_pos_hat: q_pos_hat.to_bits(),
+            d_neg_hat: d_neg_hat.to_bits(),
+            q_neg_hat: q_neg_hat.to_bits(),
+
+            d_pos_bar: self.d_pos_bar.value.to_bits(),
+            q_pos_bar: self.q_pos_bar.value.to_bits(),
+            d_neg_bar: self.d_neg_bar.value.to_bits(),
+            q_neg_bar: self.q_neg_bar.value.to_bits(),
         }
     }
 }
