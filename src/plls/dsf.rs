@@ -53,9 +53,9 @@ impl<const FRAC: i32> Dsf<FRAC> {
         //  kp   --> Hz/V     to   (%/cycle)/V
         //  ki   --> Hz/V-s   to   (%/cycle)/V/cycle
         // Where % represents the % of 360 degree
-        let fref_norm = I1F31::from_num(fref * ts);
-        let kp_norm = I1F31::from_num(kp * ts);
-        let ki_norm = I1F31::from_num(ki * ts * ts);
+        let fref_norm = I1F31::from_num(2.0 * fref * ts);
+        let kp_norm = I1F31::from_num(2.0 * kp * ts);
+        let ki_norm = I1F31::from_num(2.0 * ki * ts * ts);
         let max_integral_norm = I1F31::from_num(max_integral * ts);
 
         let filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
