@@ -10,16 +10,12 @@ pub struct PiFilter {
 }
 
 impl PiFilter {
-    pub fn new(kp: i32, ki: i32, max_integral: i32) -> Self {
-        let kp = I1F31::from_bits(kp);
-        let ki = I1F31::from_bits(ki);
-        let max_integral = I1F31::from_bits(max_integral);
-        let integral_term = I1F31::from_bits(0);
+    pub fn new(kp: I1F31, ki: I1F31, max_integral: I1F31) -> Self {
         Self {
             kp,
             ki,
             max_integral,
-            integral_term,
+            integral_term: I1F31::ZERO,
         }
     }
 

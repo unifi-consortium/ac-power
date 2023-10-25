@@ -6,7 +6,7 @@ use fixed::types::I1F31;
 use fixed::FixedI32;
 
 pub struct Dsf<const FRAC: i32> {
-    pub fref: I1F31,
+    fref: I1F31,
     filter: PiFilter,
     theta: I1F31,
     sin: I1F31,
@@ -47,14 +47,23 @@ pub struct Telemetry {
 }
 
 impl<const FRAC: i32> Dsf<FRAC> {
-    pub fn new(fref: i32, kp: i32, ki: i32, max_integral: i32) -> Dsf<FRAC> {
-        let fref = I1F31::from_bits(fref);
-        let filter = PiFilter::new(kp, ki, max_integral);
+    pub fn new(fref: f32, kp: f32, ki: f32, max_integral: f32, ts: f32) -> Dsf<FRAC> {
+        // Normalize fref, kp, and ki to I1F31 numbers
+        //  fref --> Hz       to   (%/cycle)
+        //  kp   --> Hz/V     to   (%/cycle)/V
+        //  ki   --> Hz/V-s   to   (%/cycle)/V/cycle
+        // Where % represents the % of 360 degree
+        let fref_norm = I1F31::from_num(fref * ts);
+        let kp_norm = I1F31::from_num(kp * ts);
+        let ki_norm = I1F31::from_num(ki * ts * ts);
+        let max_integral_norm = I1F31::from_num(max_integral * ts);
+
+        let filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
         Self {
-            fref,
+            fref: fref_norm,
             filter,
-            theta: I1F31::from_bits(0),
-            sin: I1F31::from_bits(0),
+            theta: I1F31::ZERO,
+            sin: I1F31::ZERO,
             cos: I1F31::MAX,
             d_pos_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
             q_pos_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
