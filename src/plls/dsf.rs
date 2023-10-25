@@ -19,6 +19,7 @@ pub struct Dsf<const FRAC: i32> {
     q_neg_bar: LowpassFilter<FRAC>,
 }
 
+// 32-bit telemetry struct for ECDC data model
 pub struct Telemetry {
     pub theta: i32,
     pub sin: i32,
