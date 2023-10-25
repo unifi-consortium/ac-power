@@ -1,5 +1,5 @@
 use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
-use crate::reference_frames::{Abc, AlphaBeta, AlphaBetaZero, Dq, Dq0, Polar};
+use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
 use crate::trig::{shift_left_120, shift_right_120, sin_cos};
 use core::convert::From;
 use fixed::types::I1F31;
@@ -39,7 +39,7 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
 }
 
 // abc to alpha beta (clarke) transform
-impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBetaZero<FRAC> {
+impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta0<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
         alpha *= TWO_THIRDS;
@@ -192,7 +192,7 @@ mod tests {
         let polar = Polar { theta, amplitude };
         let abc = Abc::from(polar);
 
-        let alpha_beta_zero = AlphaBetaZero::from(abc);
+        let alpha_beta_zero = AlphaBeta0::from(abc);
 
         // we loose a little precision in the transform
         // I think most of this is in the sin/cos shifts

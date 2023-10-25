@@ -36,7 +36,7 @@ pub struct Dq0<const FRAC: i32> {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct AlphaBetaZero<const FRAC: i32> {
+pub struct AlphaBeta0<const FRAC: i32> {
     pub alpha: FixedI32<FRAC>,
     pub beta: FixedI32<FRAC>,
     pub zero: FixedI32<FRAC>,
