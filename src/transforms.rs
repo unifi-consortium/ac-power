@@ -1,8 +1,9 @@
 use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
-use crate::reference_frames::{Abc, AlphaBeta, Dq0, Polar};
+use crate::reference_frames::{Abc, AlphaBeta, AlphaBetaZero, Dq, Dq0, Polar};
 use crate::trig::{shift_left_120, shift_right_120, sin_cos};
 use core::convert::From;
 use fixed::types::I1F31;
+use fixed::FixedI32;
 
 // polar to Abc transformation
 impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
@@ -33,12 +34,28 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
         beta *= SQRT_3_OVER_3;
         beta.saturating_mul_acc(abc.c, -SQRT_3_OVER_3);
 
-        let mut gamma = abc.a;
-        gamma *= ONE_THIRD;
-        gamma.saturating_mul_acc(abc.b, ONE_THIRD);
-        gamma.saturating_mul_acc(abc.c, ONE_THIRD);
+        Self { alpha, beta }
+    }
+}
 
-        Self { alpha, beta, gamma }
+// abc to alpha beta (clarke) transform
+impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBetaZero<FRAC> {
+    fn from(abc: Abc<FRAC>) -> Self {
+        let mut alpha = abc.a;
+        alpha *= TWO_THIRDS;
+        alpha.saturating_mul_acc(abc.b, -ONE_THIRD);
+        alpha.saturating_mul_acc(abc.c, -ONE_THIRD);
+
+        let mut beta = abc.b;
+        beta *= SQRT_3_OVER_3;
+        beta.saturating_mul_acc(abc.c, -SQRT_3_OVER_3);
+
+        let mut zero = abc.a;
+        zero *= ONE_THIRD;
+        zero.saturating_mul_acc(abc.b, ONE_THIRD);
+        zero.saturating_mul_acc(abc.c, ONE_THIRD);
+
+        Self { alpha, beta, zero }
     }
 }
 
@@ -54,15 +71,30 @@ impl<const FRAC: i32> AlphaBeta<FRAC> {
         q *= cos;
         q.saturating_mul_acc(self.beta, sin);
 
-        let z = self.gamma;
+        Dq0 {
+            d,
+            q,
+            zero: FixedI32::<FRAC>::ZERO,
+        }
+    }
 
-        Dq0 { d, q, z }
+    // DQ0 Transform
+    pub fn to_dq(&self, sin: I1F31, cos: I1F31) -> Dq<FRAC> {
+        let mut d = self.alpha;
+        d *= sin;
+        d.saturating_mul_acc(-self.beta, cos);
+
+        let mut q = self.alpha;
+        q *= cos;
+        q.saturating_mul_acc(self.beta, sin);
+
+        Dq { d, q }
     }
 }
 
 impl<const FRAC: i32> Abc<FRAC> {
-    // DQ0 Transform
-    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
+    // DQ Transform
+    pub fn to_dq(&self, sin: I1F31, cos: I1F31) -> Dq<FRAC> {
         /* sin and cos with 120 degree offsets */
         let (sin_m, cos_m) = shift_left_120(sin, cos);
         let (sin_p, cos_p) = shift_right_120(sin, cos);
@@ -79,16 +111,33 @@ impl<const FRAC: i32> Abc<FRAC> {
         q.saturating_mul_acc(self.c, cos_p);
         q *= TWO_THIRDS;
 
-        let mut z = self.a;
-        z *= ONE_THIRD;
-        z.saturating_mul_acc(self.b, ONE_THIRD);
-        z.saturating_mul_acc(self.c, ONE_THIRD);
+        Dq { d, q }
+    }
 
-        Dq0 { d, q, z }
+    // DQ0 Transform
+    pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
+        let dq = self.to_dq(sin, cos);
+
+        Dq0 {
+            d: dq.d,
+            q: dq.q,
+            zero: (*self).into(),
+        }
     }
 }
 
-impl<const FRAC: i32> Dq0<FRAC> {
+// polar to Abc transformation
+impl<const FRAC: i32> From<Abc<FRAC>> for FixedI32<FRAC> {
+    fn from(abc: Abc<FRAC>) -> Self {
+        let mut zero = abc.a;
+        zero *= ONE_THIRD;
+        zero.saturating_mul_acc(abc.b, ONE_THIRD);
+        zero.saturating_mul_acc(abc.c, ONE_THIRD);
+        zero
+    }
+}
+
+impl<const FRAC: i32> Dq<FRAC> {
     // DQ0 Transform
     pub fn to_abc(&self, sin: I1F31, cos: I1F31) -> Abc<FRAC> {
         /* sin and cos with 120 degree offsets */
@@ -98,19 +147,28 @@ impl<const FRAC: i32> Dq0<FRAC> {
         let mut a = self.d;
         a *= sin;
         a.saturating_mul_acc(self.q, cos);
-        a = a.saturating_add(self.z);
 
         let mut b = self.d;
         b *= sin_m;
         b.saturating_mul_acc(self.q, cos_m);
-        b = b.saturating_add(self.z);
 
         let mut c = self.d;
         c *= sin_p;
         c.saturating_mul_acc(self.q, cos_p);
-        c = c.saturating_add(self.z);
 
         Abc { a, b, c }
+    }
+}
+
+impl<const FRAC: i32> Dq0<FRAC> {
+    // DQ0 Transform
+    pub fn to_abc(&self, sin: I1F31, cos: I1F31) -> Abc<FRAC> {
+        Dq::<FRAC> {
+            d: self.d,
+            q: self.q,
+        }
+        .to_abc(sin, cos)
+            + self.zero
     }
 }
 
@@ -134,14 +192,14 @@ mod tests {
         let polar = Polar { theta, amplitude };
         let abc = Abc::from(polar);
 
-        let alpha_beta = AlphaBeta::from(abc);
+        let alpha_beta_zero = AlphaBetaZero::from(abc);
 
         // we loose a little precision in the transform
         // I think most of this is in the sin/cos shifts
         // TODO:  Can we make this better?
-        assert_relative_eq!(f64::from(alpha_beta.alpha), 83.34947681427002);
-        assert_relative_eq!(f64::from(alpha_beta.beta), -472.70061111450195);
-        assert_relative_eq!(f64::from(alpha_beta.gamma), -1.430511474609375e-6);
+        assert_relative_eq!(f64::from(alpha_beta_zero.alpha), 83.34947681427002);
+        assert_relative_eq!(f64::from(alpha_beta_zero.beta), -472.70061111450195);
+        assert_relative_eq!(f64::from(alpha_beta_zero.zero), -1.430511474609375e-6);
     }
 
     #[test]
