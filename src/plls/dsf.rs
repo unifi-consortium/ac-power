@@ -1,16 +1,22 @@
-use crate::plls::filter::PiFilter;
+use crate::plls::filter::{LowpassFilter, PiFilter};
 use crate::reference_frames::Abc;
 use crate::reference_frames::AlphaBeta;
-use crate::trig::sin_cos;
+use crate::trig::{cheyshev, sin_cos};
 use fixed::types::I1F31;
 use fixed::FixedI32;
 
 pub struct Dsf<const FRAC: i32> {
     pub fref: I1F31,
     filter: PiFilter,
-    pub theta: I1F31,
-    pub sin: I1F31,
-    pub cos: I1F31,
+    theta: I1F31,
+    sin: I1F31,
+    cos: I1F31,
+
+    // decoupling block filters
+    d_pos_bar: LowpassFilter<FRAC>,
+    q_pos_bar: LowpassFilter<FRAC>,
+    d_neg_bar: LowpassFilter<FRAC>,
+    q_neg_bar: LowpassFilter<FRAC>,
 }
 
 pub struct Telemetry {
@@ -39,6 +45,10 @@ impl<const FRAC: i32> Dsf<FRAC> {
             theta: I1F31::from_bits(0),
             sin: I1F31::from_bits(0),
             cos: I1F31::MAX,
+            d_pos_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
+            q_pos_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
+            d_neg_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
+            q_neg_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
         }
     }
 
@@ -51,7 +61,24 @@ impl<const FRAC: i32> Dsf<FRAC> {
         let dq_neg = alpha_beta.to_dq(-self.sin, self.cos);
         let zero = FixedI32::<FRAC>::from(abc);
 
-        // TODO: Decoupling block
+        // De-coupling block
+        let (sin2, cos2) = cheyshev(self.cos, self.sin, self.cos, I1F31::ZERO, I1F31::MAX);
+        let mut d_pos_hat = dq_pos.d;
+        d_pos_hat.mul_acc(-cos2, self.d_neg_bar.value);
+        d_pos_hat.mul_acc(-sin2, self.q_neg_bar.value);
+        let mut q_pos_hat = dq_pos.q;
+        q_pos_hat.mul_acc(sin2, self.d_neg_bar.value);
+        q_pos_hat.mul_acc(-cos2, self.q_neg_bar.value);
+        let mut d_neg_hat = dq_neg.d;
+        d_neg_hat.mul_acc(-cos2, self.d_pos_bar.value);
+        d_neg_hat.mul_acc(sin2, self.q_pos_bar.value);
+        let mut q_neg_hat = dq_neg.q;
+        q_neg_hat.mul_acc(-sin2, self.d_pos_bar.value);
+        q_neg_hat.mul_acc(-cos2, self.q_pos_bar.value);
+        self.d_pos_bar.update(d_pos_hat);
+        self.q_pos_bar.update(q_pos_hat);
+        self.d_neg_bar.update(d_pos_hat);
+        self.q_neg_bar.update(q_pos_hat);
 
         // PI control loop
         let f = self.fref + self.filter.update(dq_pos.q);

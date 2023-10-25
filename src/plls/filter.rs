@@ -39,3 +39,24 @@ impl PiFilter {
         proportional_term + self.integral_term
     }
 }
+
+pub struct LowpassFilter<const FRAC: i32> {
+    k: I1F31,
+    pub value: FixedI32<FRAC>,
+}
+
+impl<const FRAC: i32> LowpassFilter<FRAC> {
+    pub fn new(k: I1F31) -> Self {
+        Self {
+            k,
+            value: FixedI32::<FRAC>::ZERO,
+        }
+    }
+
+    pub fn update(&mut self, x: FixedI32<FRAC>) -> FixedI32<FRAC> {
+        let mut delta = x - self.value;
+        delta *= self.k;
+        self.value += delta;
+        self.value
+    }
+}
