@@ -2,6 +2,7 @@
 
 pub mod constants;
 pub mod operations;
+pub mod plls;
 pub mod reference_frames;
 pub mod transforms;
 pub mod trig;

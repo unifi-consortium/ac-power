@@ -41,6 +41,14 @@ pub fn shift_left_120(sin: I1F31, cos: I1F31) -> (I1F31, I1F31) {
     (sin_shifted, cos_shifted)
 }
 
+// use cheyshev method to calculate sin(Nx) and cos(Nx) from cos(x), sin((N-1)x), cos((N-1)x), sin((N-2)x), and cos((N-2)x)
+// https://trans4mind.com/personal_development/mathematics/trigonometry/multipleAnglesRecursiveFormula.htm
+pub fn cheyshev(cos: I1F31, sin1: I1F31, cos1: I1F31, sin2: I1F31, cos2: I1F31) -> (I1F31, I1F31) {
+    let cosn = (cos * cos1).wrapping_mul_int(2).wrapping_sub(cos2);
+    let sinn = (cos * sin1).wrapping_mul_int(2).wrapping_sub(sin2);
+    (sinn, cosn)
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -50,7 +58,7 @@ mod tests {
     use std::f64::consts::PI;
 
     #[test]
-    fn shift_left() {
+    fn test_shift_left() {
         let angle: f64 = 0.2;
         let (sin, cos) = sin_cos(I1F31::from_num(angle));
         let (sin_shifted, cos_shifted) = shift_left_120(sin, cos);
@@ -68,7 +76,7 @@ mod tests {
     }
 
     #[test]
-    fn shift_right() {
+    fn test_shift_right() {
         let angle: f64 = 0.2;
         let (sin, cos) = sin_cos(I1F31::from_num(angle));
         let (sin_shifted, cos_shifted) = shift_right_120(sin, cos);
@@ -83,5 +91,19 @@ mod tests {
             (PI * angle + 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
+    }
+
+    #[test]
+    fn test_cheyshev() {
+        let angle: f64 = 0.2;
+        let (sin0, cos0) = (I1F31::ZERO, I1F31::MAX);
+        let (sin1, cos1) = sin_cos(I1F31::from_num(angle));
+        let (sin2, cos2) = cheyshev(cos1, sin1, cos1, sin0, cos0);
+        let (sin3, cos3) = cheyshev(cos1, sin2, cos2, sin1, cos1);
+
+        assert_abs_diff_eq!(f64::from(sin2), (2.0 * PI * angle).sin(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f64::from(cos2), (2.0 * PI * angle).cos(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f64::from(sin3), (3.0 * PI * angle).sin(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f64::from(cos3), (3.0 * PI * angle).cos(), epsilon = 0.0001);
     }
 }
