@@ -76,19 +76,23 @@ impl<const FRAC: i32> Dsf<FRAC> {
         let mut d_pos_hat = dq_pos.d;
         d_pos_hat.mul_acc(-cos2, self.d_neg_bar.value);
         d_pos_hat.mul_acc(-sin2, self.q_neg_bar.value);
+
         let mut q_pos_hat = dq_pos.q;
         q_pos_hat.mul_acc(sin2, self.d_neg_bar.value);
         q_pos_hat.mul_acc(-cos2, self.q_neg_bar.value);
+
         let mut d_neg_hat = dq_neg.d;
         d_neg_hat.mul_acc(-cos2, self.d_pos_bar.value);
         d_neg_hat.mul_acc(sin2, self.q_pos_bar.value);
+
         let mut q_neg_hat = dq_neg.q;
         q_neg_hat.mul_acc(-sin2, self.d_pos_bar.value);
         q_neg_hat.mul_acc(-cos2, self.q_pos_bar.value);
+
         self.d_pos_bar.update(d_pos_hat);
         self.q_pos_bar.update(q_pos_hat);
-        self.d_neg_bar.update(d_pos_hat);
-        self.q_neg_bar.update(q_pos_hat);
+        self.d_neg_bar.update(d_neg_hat);
+        self.q_neg_bar.update(q_neg_hat);
 
         // PI control loop
         let f = self.fref + self.filter.update(q_pos_hat);
