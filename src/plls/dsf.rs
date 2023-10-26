@@ -11,6 +11,7 @@ pub struct Dsf<const FRAC: i32> {
     pub theta: I1F31,
     pub sin: I1F31,
     pub cos: I1F31,
+    pub f: I1F31,
 
     // decoupling block filters
     pub d_pos_bar: LowpassFilter<FRAC>,
@@ -38,6 +39,7 @@ impl<const FRAC: i32> Pll<FRAC> for Dsf<FRAC> {
             theta: I1F31::ZERO,
             sin: I1F31::ZERO,
             cos: I1F31::MAX,
+            f: fref_norm,
             d_pos_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
             q_pos_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
             d_neg_bar: LowpassFilter::<FRAC>::new(I1F31::from_num(0.01)),
@@ -73,10 +75,10 @@ impl<const FRAC: i32> Pll<FRAC> for Dsf<FRAC> {
         self.q_neg_bar.update(q_neg_hat);
 
         // PI control loop
-        let f = self.fref + self.filter.update(q_pos_hat);
+        self.f = self.fref + self.filter.update(q_pos_hat);
 
         // update the phase info
-        self.theta = self.theta.wrapping_add(f);
+        self.theta = self.theta.wrapping_add(self.f);
         (self.sin, self.cos) = sin_cos(self.theta);
     }
 }
