@@ -15,7 +15,7 @@ The core arithmetic is all [fixed-point](https://en.wikipedia.org/wiki/Fixed-poi
 Use of the [fixed](https://crates.io/crates/fixed) crate provides zero-cost abstractions which removes a lot of the pain points typically associated with using fixed-point arithmetic such as keeping track of the fractional bits and converting to/from floating point.
 
 # Reference frames
-The crate has 4 data types to represent 4 different reference frames for AC power systems:
+The crate has 6 data types to represent the different reference frames for AC power systems:
 
 Balanced reference frames:
 1.  Polar - Representing a balanced system specified with an amplitude and a phase.
@@ -24,7 +24,7 @@ Balanced reference frames:
 
 Unbalanced reference frames:
 1.  Abc - Raw three-phase signals
-2.  AlphaBeta0 - Unbalanced clarke representation
+2.  AlphaBeta0 - Stationary referene frame
 3.  Dq0 - Rotating reference frame
 
 
