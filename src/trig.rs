@@ -1,10 +1,10 @@
-use fixed::types::I1F31;
+use fixed::types::{I0F32, I1F31};
 use idsp::cossin;
 
 const ONE_HALF: I1F31 = I1F31::from_bits(0x4000_0000);
 const SQRT_3_OVER_2: I1F31 = I1F31::from_bits(0x6ed9_eba1);
 
-pub fn sin_cos(theta: I1F31) -> (I1F31, I1F31) {
+pub fn sin_cos(theta: I0F32) -> (I1F31, I1F31) {
     // use the idsp library cos/sin function
     let (cos_i32, sin_i32) = cossin(theta.to_bits());
 
@@ -60,17 +60,17 @@ mod tests {
     #[test]
     fn test_shift_left() {
         let angle: f64 = 0.2;
-        let (sin, cos) = sin_cos(I1F31::from_num(angle));
+        let (sin, cos) = sin_cos(I0F32::from_num(angle));
         let (sin_shifted, cos_shifted) = shift_left_120(sin, cos);
 
         assert_abs_diff_eq!(
             f64::from(sin_shifted),
-            (PI * angle - 2.0 * PI / 3.0).sin(),
+            (2.0 * PI * angle - 2.0 * PI / 3.0).sin(),
             epsilon = 0.0001
         );
         assert_abs_diff_eq!(
             f64::from(cos_shifted),
-            (PI * angle - 2.0 * PI / 3.0).cos(),
+            (2.0 * PI * angle - 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
     }
@@ -78,17 +78,17 @@ mod tests {
     #[test]
     fn test_shift_right() {
         let angle: f64 = 0.2;
-        let (sin, cos) = sin_cos(I1F31::from_num(angle));
+        let (sin, cos) = sin_cos(I0F32::from_num(angle));
         let (sin_shifted, cos_shifted) = shift_right_120(sin, cos);
 
         assert_abs_diff_eq!(
             f64::from(sin_shifted),
-            (PI * angle + 2.0 * PI / 3.0).sin(),
+            (2.0 * PI * angle + 2.0 * PI / 3.0).sin(),
             epsilon = 0.0001
         );
         assert_abs_diff_eq!(
             f64::from(cos_shifted),
-            (PI * angle + 2.0 * PI / 3.0).cos(),
+            (2.0 * PI * angle + 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
     }
@@ -97,13 +97,29 @@ mod tests {
     fn test_chebyshev() {
         let angle: f64 = 0.2;
         let (sin0, cos0) = (I1F31::ZERO, I1F31::MAX);
-        let (sin1, cos1) = sin_cos(I1F31::from_num(angle));
+        let (sin1, cos1) = sin_cos(I0F32::from_num(angle));
         let (sin2, cos2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
         let (sin3, cos3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
 
-        assert_abs_diff_eq!(f64::from(sin2), (2.0 * PI * angle).sin(), epsilon = 0.0001);
-        assert_abs_diff_eq!(f64::from(cos2), (2.0 * PI * angle).cos(), epsilon = 0.0001);
-        assert_abs_diff_eq!(f64::from(sin3), (3.0 * PI * angle).sin(), epsilon = 0.0001);
-        assert_abs_diff_eq!(f64::from(cos3), (3.0 * PI * angle).cos(), epsilon = 0.0001);
+        assert_abs_diff_eq!(
+            f64::from(sin2),
+            (2.0 * 2.0 * PI * angle).sin(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(cos2),
+            (2.0 * 2.0 * PI * angle).cos(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(sin3),
+            (3.0 * 2.0 * PI * angle).sin(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(cos3),
+            (3.0 * 2.0 * PI * angle).cos(),
+            epsilon = 0.0001
+        );
     }
 }
