@@ -1,5 +1,5 @@
 use crate::plls::filter::{LowpassFilter, PiFilter};
-use crate::plls::Pll;
+use crate::plls::PhaseLockedLoop;
 use crate::reference_frames::Abc;
 use crate::reference_frames::AlphaBeta;
 use crate::trig::{cheyshev, sin_cos};
@@ -20,7 +20,7 @@ pub struct Dsf<const FRAC: i32> {
     pub q_neg_bar: LowpassFilter<FRAC>,
 }
 
-impl<const FRAC: i32> Pll<FRAC> for Dsf<FRAC> {
+impl<const FRAC: i32> PhaseLockedLoop<FRAC> for Dsf<FRAC> {
     fn new(fref: f32, kp: f32, ki: f32, max_integral: f32, ts: f32) -> Dsf<FRAC> {
         // Normalize fref, kp, and ki to I1F31 numbers
         //  fref --> Hz       to   (%/cycle)
