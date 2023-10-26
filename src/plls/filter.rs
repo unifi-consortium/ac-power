@@ -1,38 +1,35 @@
-// use fixed::types::extra::LeEqU32;
-use fixed::types::{I0F32, I1F31};
+use fixed::types::{I0F32, I0F64, I1F31};
 use fixed::FixedI32;
 
 pub struct PiFilter {
     kp: I0F32,
     ki: I0F32,
-    max_integral: I0F32,
-    integral_term: I0F32,
+    max_integral: i64,
+    integral_term: i64,
 }
 
 impl PiFilter {
-    pub fn new(kp: I0F32, ki: I0F32, max_integral: I0F32) -> Self {
+    pub fn new(kp: I0F32, ki: I0F32, max_integral: I0F64) -> Self {
         Self {
             kp,
             ki,
-            max_integral,
-            integral_term: I0F32::ZERO,
+            max_integral: max_integral.to_bits(),
+            integral_term: 0,
         }
     }
 
     pub fn update<const FRAC: i32>(&mut self, error: FixedI32<FRAC>) -> I0F32 {
         let mut proportional_term = self.kp;
         proportional_term *= error;
-        self.integral_term.saturating_mul_acc(self.ki, error);
+
+        self.integral_term += (self.ki.to_bits() as i64) * (error.to_bits() as i64);
 
         // anti-windup
-        if self.integral_term > self.max_integral {
-            self.integral_term = self.max_integral;
-        }
-        if self.integral_term < -self.max_integral {
-            self.integral_term = -self.max_integral;
-        }
+        self.integral_term = self
+            .integral_term
+            .clamp(-self.max_integral, self.max_integral);
 
-        proportional_term + self.integral_term
+        proportional_term + I0F32::from_bits((self.integral_term >> 32) as i32)
     }
 }
 
