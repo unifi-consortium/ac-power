@@ -2,7 +2,7 @@ use crate::plls::filter::{LowpassFilter, PiFilter};
 use crate::plls::PhaseLockedLoop;
 use crate::reference_frames::Abc;
 use crate::reference_frames::AlphaBeta;
-use crate::trig::{cheyshev, sin_cos};
+use crate::trig::{chebyshev, sin_cos};
 use fixed::types::I1F31;
 
 pub struct Dsf<const FRAC: i32> {
@@ -56,7 +56,7 @@ impl<const FRAC: i32> PhaseLockedLoop<FRAC> for Dsf<FRAC> {
         let dq_neg = alpha_beta.to_dq(-self.sin, self.cos);
 
         // De-coupling block
-        let (sin2, cos2) = cheyshev(self.cos, self.sin, self.cos, I1F31::ZERO, I1F31::MAX);
+        let (sin2, cos2) = chebyshev(self.cos, self.sin, self.cos, I1F31::ZERO, I1F31::MAX);
         let mut d_pos_hat = dq_pos.d;
         d_pos_hat.mul_acc(-cos2, self.d_neg_bar.value);
         d_pos_hat.mul_acc(-sin2, self.q_neg_bar.value);
