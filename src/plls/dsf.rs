@@ -3,15 +3,15 @@ use crate::plls::PhaseLockedLoop;
 use crate::reference_frames::Abc;
 use crate::reference_frames::AlphaBeta;
 use crate::trig::{chebyshev, sin_cos};
-use fixed::types::I1F31;
+use fixed::types::{I0F32, I1F31};
 
 pub struct Dsf<const FRAC: i32> {
-    pub fref: I1F31,
+    pub fref: I0F32,
     filter: PiFilter,
-    pub theta: I1F31,
+    pub theta: I0F32,
     pub sin: I1F31,
     pub cos: I1F31,
-    pub f: I1F31,
+    pub f: I0F32,
 
     // decoupling block filters
     pub d_pos_bar: LowpassFilter<FRAC>,
@@ -27,16 +27,16 @@ impl<const FRAC: i32> PhaseLockedLoop<FRAC> for Dsf<FRAC> {
         //  kp   --> Hz/V     to   (%/cycle)/V
         //  ki   --> Hz/V-s   to   (%/cycle)/V/cycle
         // Where % represents the % of 360 degree
-        let fref_norm = I1F31::from_num(2.0 * fref * ts);
-        let kp_norm = I1F31::from_num(2.0 * kp * ts);
-        let ki_norm = I1F31::from_num(2.0 * ki * ts * ts);
-        let max_integral_norm = I1F31::from_num(max_integral * ts);
+        let fref_norm = I0F32::from_num(fref * ts);
+        let kp_norm = I0F32::from_num(kp * ts);
+        let ki_norm = I0F32::from_num(ki * ts * ts);
+        let max_integral_norm = I0F32::from_num(max_integral * ts);
 
         let filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
         Self {
             fref: fref_norm,
             filter,
-            theta: I1F31::ZERO,
+            theta: I0F32::ZERO,
             sin: I1F31::ZERO,
             cos: I1F31::MAX,
             f: fref_norm,

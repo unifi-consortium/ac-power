@@ -1,25 +1,25 @@
 // use fixed::types::extra::LeEqU32;
-use fixed::types::I1F31;
+use fixed::types::{I0F32, I1F31};
 use fixed::FixedI32;
 
 pub struct PiFilter {
-    kp: I1F31,
-    ki: I1F31,
-    max_integral: I1F31,
-    integral_term: I1F31,
+    kp: I0F32,
+    ki: I0F32,
+    max_integral: I0F32,
+    integral_term: I0F32,
 }
 
 impl PiFilter {
-    pub fn new(kp: I1F31, ki: I1F31, max_integral: I1F31) -> Self {
+    pub fn new(kp: I0F32, ki: I0F32, max_integral: I0F32) -> Self {
         Self {
             kp,
             ki,
             max_integral,
-            integral_term: I1F31::ZERO,
+            integral_term: I0F32::ZERO,
         }
     }
 
-    pub fn update<const FRAC: i32>(&mut self, error: FixedI32<FRAC>) -> I1F31 {
+    pub fn update<const FRAC: i32>(&mut self, error: FixedI32<FRAC>) -> I0F32 {
         let mut proportional_term = self.kp;
         proportional_term *= error;
         self.integral_term.saturating_mul_acc(self.ki, error);
