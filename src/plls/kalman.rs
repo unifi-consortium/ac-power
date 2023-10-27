@@ -52,7 +52,8 @@ impl<const FRAC: i32> Term<FRAC> {
 
 pub struct Kalman<const FRAC: i32> {
     pub term: Term<FRAC>,
-    acc: FixedI32<FRAC>,
+    pub acc: FixedI32<FRAC>,
+    pub error: FixedI32<FRAC>,
 }
 
 impl<const FRAC: i32> Kalman<FRAC> {
@@ -61,6 +62,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
         Self {
             term,
             acc: FixedI32::<FRAC>::ZERO,
+            error: FixedI32::<FRAC>::ZERO,
         }
     }
     pub fn update(&mut self, v: FixedI32<FRAC>) {
@@ -70,5 +72,6 @@ impl<const FRAC: i32> Kalman<FRAC> {
         acc += self.term.update(error);
 
         self.acc = acc;
+        self.error = error;
     }
 }
