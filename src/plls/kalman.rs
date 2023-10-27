@@ -66,7 +66,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
         }
     }
     pub fn update(&mut self, v: FixedI32<FRAC>) {
-        let error = v - self.acc;
+        let error = v.saturating_sub(self.acc);
 
         let mut acc = FixedI32::<FRAC>::ZERO;
         acc += self.term.update(error);
