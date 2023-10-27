@@ -15,8 +15,8 @@ pub struct Term<const FRAC: i32> {
     cos: I1F31,
 
     // feedback gains
-    k_alpha: I1F31,
-    k_beta: I1F31,
+    pub k_alpha: I1F31,
+    pub k_beta: I1F31,
 }
 
 impl<const FRAC: i32> Term<FRAC> {
@@ -24,7 +24,7 @@ impl<const FRAC: i32> Term<FRAC> {
         let (sin, cos) = sin_cos(I0F32::from_num(fref * ts));
         Self {
             alpha_beta: AlphaBeta {
-                alpha: FixedI32::<FRAC>::from_num(325.0),
+                alpha: FixedI32::<FRAC>::ZERO,
                 beta: FixedI32::<FRAC>::ZERO,
             },
             sin,
@@ -37,12 +37,12 @@ impl<const FRAC: i32> Term<FRAC> {
         let mut alpha = self.alpha_beta.alpha;
         alpha *= self.cos;
         alpha.saturating_mul_acc(-self.sin, self.alpha_beta.beta);
-        // alpha.saturating_mul_acc(self.k_alpha, error);
+        alpha.saturating_mul_acc(self.k_alpha, error);
 
         let mut beta = self.alpha_beta.beta;
         beta *= self.cos;
         beta.saturating_mul_acc(self.sin, self.alpha_beta.alpha);
-        // beta.saturating_mul_acc(self.k_beta, error);
+        beta.saturating_mul_acc(self.k_beta, error);
 
         self.alpha_beta.alpha = alpha;
         self.alpha_beta.beta = beta;
