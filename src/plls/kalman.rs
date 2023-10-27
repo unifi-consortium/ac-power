@@ -36,13 +36,13 @@ impl<const FRAC: i32> Term<FRAC> {
     pub fn update(&mut self, error: FixedI32<FRAC>) -> FixedI32<FRAC> {
         let mut alpha = self.alpha_beta.alpha;
         alpha *= self.cos;
-        alpha.saturating_mul_acc(-self.sin, self.alpha_beta.beta);
-        alpha.saturating_mul_acc(self.k_alpha, error);
+        alpha.mul_acc(-self.sin, self.alpha_beta.beta);
+        alpha.mul_acc(self.k_alpha, error);
 
         let mut beta = self.alpha_beta.beta;
         beta *= self.cos;
-        beta.saturating_mul_acc(self.sin, self.alpha_beta.alpha);
-        beta.saturating_mul_acc(self.k_beta, error);
+        beta.mul_acc(self.sin, self.alpha_beta.alpha);
+        beta.mul_acc(self.k_beta, error);
 
         self.alpha_beta.alpha = alpha;
         self.alpha_beta.beta = beta;
