@@ -1,5 +1,7 @@
+use crate::plls::filter::PiFilter;
 use crate::trig::sin_cos;
 use fixed::types::I0F32;
+use fixed::types::I0F64;
 use fixed::FixedI32;
 
 use crate::reference_frames::AlphaBeta;
@@ -51,18 +53,38 @@ impl<const FRAC: i32> Term<FRAC> {
 }
 
 pub struct Kalman<const FRAC: i32> {
+    // kalman blocks
     pub term: Term<FRAC>,
     acc: FixedI32<FRAC>,
     error: FixedI32<FRAC>,
+    fref: I0F32,
+    pub f: I0F32,
+    pub theta: I0F32,
+    sin: I1F31,
+    cos: I1F31,
+    filter: PiFilter,
 }
 
 impl<const FRAC: i32> Kalman<FRAC> {
-    pub fn new(fref: f32, ts: f32) -> Self {
+    pub fn new(fref: f32, kp: f32, ki: f32, max_integral: f32, ts: f32) -> Self {
         let term = Term::new(fref, ts, 0.08, -0.04);
+        let fref_norm = I0F32::from_num(fref * ts);
+        let kp_norm = I0F32::from_num(kp * ts);
+        let ki_norm = I0F32::from_num(ki * ts * ts);
+        let max_integral_norm = I0F64::from_num(max_integral * ts);
+        let filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
+
         Self {
             term,
             acc: FixedI32::<FRAC>::ZERO,
             error: FixedI32::<FRAC>::ZERO,
+
+            theta: I0F32::ZERO,
+            sin: I1F31::ZERO,
+            cos: I1F31::MAX,
+            fref: fref_norm,
+            f: fref_norm,
+            filter,
         }
     }
     pub fn update(&mut self, v: FixedI32<FRAC>) {
@@ -73,5 +95,15 @@ impl<const FRAC: i32> Kalman<FRAC> {
 
         self.acc = acc;
         self.error = error;
+
+        // park transform
+        let dq = self.term.alpha_beta.to_dq(self.sin, self.cos);
+
+        // PI control loop
+        self.f = self.fref + self.filter.update(dq.q);
+
+        // update the phase info
+        self.theta = self.theta.wrapping_add(self.f);
+        (self.sin, self.cos) = sin_cos(self.theta);
     }
 }
