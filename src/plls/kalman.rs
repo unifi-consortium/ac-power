@@ -1,11 +1,11 @@
 use crate::plls::filter::PiFilter;
 use crate::reference_frames::AlphaBeta;
 use crate::trig::sin_cos;
-use az::SaturatingCast;
+
 use fixed::types::I0F32;
 use fixed::types::I0F64;
 use fixed::types::I1F31;
-use fixed::FixedI32;
+use fixed::{FixedI32, FixedI64};
 use heapless::Vec;
 
 #[derive(Debug, Copy, Clone)]
@@ -100,7 +100,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
             filter,
         }
     }
-    pub fn update(&mut self, v: FixedI32<FRAC>) -> i32 {
+    pub fn update(&mut self, v: FixedI32<FRAC>) -> i64 {
         // kalman feedback section
         let error = v - self.acc;
         let mut acc = FixedI32::<FRAC>::ZERO;
@@ -120,8 +120,8 @@ impl<const FRAC: i32> Kalman<FRAC> {
         (self.sin, self.cos) = sin_cos(self.theta);
 
         // calculate the next sample time
-        let ratio: I1F31 = self.fref.wide_div(self.f).saturating_cast();
-        let mut lmt = FixedI32::<16>::from_bits(10_000);
+        let ratio = self.fref.wide_div(self.f);
+        let mut lmt = FixedI64::<16>::from_num(10_000);
         lmt *= ratio;
         lmt.to_bits()
     }
