@@ -55,7 +55,6 @@ pub struct Kalman<const FRAC: i32> {
     // kalman blocks
     pub terms: Vec<Term<FRAC>, 12>,
     acc: FixedI32<FRAC>,
-    error: FixedI32<FRAC>,
     fref: I0F32,
     pub f: I0F32,
     pub theta: I0F32,
@@ -91,7 +90,6 @@ impl<const FRAC: i32> Kalman<FRAC> {
         Self {
             terms,
             acc: FixedI32::<FRAC>::ZERO,
-            error: FixedI32::<FRAC>::ZERO,
 
             theta: I0F32::ZERO,
             sin: I1F31::ZERO,
@@ -102,15 +100,13 @@ impl<const FRAC: i32> Kalman<FRAC> {
         }
     }
     pub fn update(&mut self, v: FixedI32<FRAC>) {
+        // kalman feedback section
         let error = v - self.acc;
-
         let mut acc = FixedI32::<FRAC>::ZERO;
         for term in &mut self.terms {
             acc += term.update(error);
         }
-
         self.acc = acc;
-        self.error = error;
 
         // park transform
         let dq = self.terms[0].alpha_beta.to_dq(self.sin, self.cos);

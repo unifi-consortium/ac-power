@@ -27,12 +27,12 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
         alpha *= TWO_THIRDS;
-        alpha.saturating_mul_acc(abc.b, -ONE_THIRD);
-        alpha.saturating_mul_acc(abc.c, -ONE_THIRD);
+        alpha.mul_acc(abc.b, -ONE_THIRD);
+        alpha.mul_acc(abc.c, -ONE_THIRD);
 
         let mut beta = abc.b;
         beta *= SQRT_3_OVER_3;
-        beta.saturating_mul_acc(abc.c, -SQRT_3_OVER_3);
+        beta.mul_acc(abc.c, -SQRT_3_OVER_3);
 
         Self { alpha, beta }
     }
@@ -43,17 +43,17 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta0<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
         alpha *= TWO_THIRDS;
-        alpha.saturating_mul_acc(abc.b, -ONE_THIRD);
-        alpha.saturating_mul_acc(abc.c, -ONE_THIRD);
+        alpha.mul_acc(abc.b, -ONE_THIRD);
+        alpha.mul_acc(abc.c, -ONE_THIRD);
 
         let mut beta = abc.b;
         beta *= SQRT_3_OVER_3;
-        beta.saturating_mul_acc(abc.c, -SQRT_3_OVER_3);
+        beta.mul_acc(abc.c, -SQRT_3_OVER_3);
 
         let mut zero = abc.a;
         zero *= ONE_THIRD;
-        zero.saturating_mul_acc(abc.b, ONE_THIRD);
-        zero.saturating_mul_acc(abc.c, ONE_THIRD);
+        zero.mul_acc(abc.b, ONE_THIRD);
+        zero.mul_acc(abc.c, ONE_THIRD);
 
         Self { alpha, beta, zero }
     }
@@ -65,11 +65,11 @@ impl<const FRAC: i32> AlphaBeta<FRAC> {
     pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
         let mut d = self.alpha;
         d *= sin;
-        d.saturating_mul_acc(-self.beta, cos);
+        d.mul_acc(-self.beta, cos);
 
         let mut q = self.alpha;
         q *= cos;
-        q.saturating_mul_acc(self.beta, sin);
+        q.mul_acc(self.beta, sin);
 
         Dq0 {
             d,
@@ -82,11 +82,11 @@ impl<const FRAC: i32> AlphaBeta<FRAC> {
     pub fn to_dq(&self, sin: I1F31, cos: I1F31) -> Dq<FRAC> {
         let mut d = self.alpha;
         d *= sin;
-        d.saturating_mul_acc(-self.beta, cos);
+        d.mul_acc(-self.beta, cos);
 
         let mut q = self.alpha;
         q *= cos;
-        q.saturating_mul_acc(self.beta, sin);
+        q.mul_acc(self.beta, sin);
 
         Dq { d, q }
     }
@@ -101,14 +101,14 @@ impl<const FRAC: i32> Abc<FRAC> {
 
         let mut d = self.a;
         d *= sin;
-        d.saturating_mul_acc(self.b, sin_m);
-        d.saturating_mul_acc(self.c, sin_p);
+        d.mul_acc(self.b, sin_m);
+        d.mul_acc(self.c, sin_p);
         d *= TWO_THIRDS;
 
         let mut q = self.a;
         q *= cos;
-        q.saturating_mul_acc(self.b, cos_m);
-        q.saturating_mul_acc(self.c, cos_p);
+        q.mul_acc(self.b, cos_m);
+        q.mul_acc(self.c, cos_p);
         q *= TWO_THIRDS;
 
         Dq { d, q }
@@ -131,8 +131,8 @@ impl<const FRAC: i32> From<Abc<FRAC>> for FixedI32<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut zero = abc.a;
         zero *= ONE_THIRD;
-        zero.saturating_mul_acc(abc.b, ONE_THIRD);
-        zero.saturating_mul_acc(abc.c, ONE_THIRD);
+        zero.mul_acc(abc.b, ONE_THIRD);
+        zero.mul_acc(abc.c, ONE_THIRD);
         zero
     }
 }
@@ -146,15 +146,15 @@ impl<const FRAC: i32> Dq<FRAC> {
 
         let mut a = self.d;
         a *= sin;
-        a.saturating_mul_acc(self.q, cos);
+        a.mul_acc(self.q, cos);
 
         let mut b = self.d;
         b *= sin_m;
-        b.saturating_mul_acc(self.q, cos_m);
+        b.mul_acc(self.q, cos_m);
 
         let mut c = self.d;
         c *= sin_p;
-        c.saturating_mul_acc(self.q, cos_p);
+        c.mul_acc(self.q, cos_p);
 
         Abc { a, b, c }
     }
