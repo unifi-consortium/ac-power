@@ -87,7 +87,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
         let ki = 16.0 / (gamma * gamma * tset * tset * vref);
 
         // calculate the gains of clock filter
-        let ka = 50.0 * 2e3;
+        let ka = 50.0 * 2e-3;
         let k = 50.0;
 
         // normalize terms to the sampling frequency and conver to fixed-point
