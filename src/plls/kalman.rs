@@ -121,10 +121,8 @@ impl<const FRAC: i32> Kalman<FRAC> {
         (self.sin, self.cos) = sin_cos(self.theta);
 
         // calculate the next sample time
-        let num: FixedI32<30> = self.fref.cast();
-        let denom: FixedI32<30> = self.f.cast();
-        let ratio: FixedI32<30> = num / denom;
-        let mut lmt = FixedI32::<16>::from_num(10_000);
+        let ratio: FixedI32<30> = self.fref.wide_div(self.f).cast();
+        let mut lmt = FixedI32::<16>::from_bits(10_000 << 4);
         lmt *= ratio;
         lmt.to_bits()
     }
