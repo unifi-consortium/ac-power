@@ -1,12 +1,11 @@
 use crate::plls::filter::PiFilter;
+use crate::reference_frames::AlphaBeta;
 use crate::trig::sin_cos;
 use fixed::types::I0F32;
 use fixed::types::I0F64;
-use fixed::FixedI32;
-
-use crate::reference_frames::AlphaBeta;
-
 use fixed::types::I1F31;
+use fixed::FixedI32;
+use heapless::Vec;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Term<const FRAC: i32> {
@@ -54,7 +53,7 @@ impl<const FRAC: i32> Term<FRAC> {
 
 pub struct Kalman<const FRAC: i32> {
     // kalman blocks
-    pub term: Term<FRAC>,
+    pub terms: Vec<Term<FRAC>, 12>,
     acc: FixedI32<FRAC>,
     error: FixedI32<FRAC>,
     fref: I0F32,
@@ -67,7 +66,22 @@ pub struct Kalman<const FRAC: i32> {
 
 impl<const FRAC: i32> Kalman<FRAC> {
     pub fn new(fref: f32, kp: f32, ki: f32, max_integral: f32, ts: f32) -> Self {
-        let term = Term::new(fref, ts, 0.08, -0.04);
+        // let terms = Term::new(fref, ts, 0.08, -0.04);
+
+        let mut terms: Vec<Term<FRAC>, 12> = Vec::new();
+        terms
+            .push(Term::new(fref, ts, 0.08700214, -0.01708236))
+            .unwrap();
+        terms
+            .push(Term::new(3.0 * fref, ts, 0.05441161, -0.02309186))
+            .unwrap();
+        terms
+            .push(Term::new(5.0 * fref, ts, 0.05151601, -0.02898203))
+            .unwrap();
+        terms
+            .push(Term::new(7.0 * fref, ts, 0.03887693, -0.04452462))
+            .unwrap();
+
         let fref_norm = I0F32::from_num(fref * ts);
         let kp_norm = I0F32::from_num(kp * ts);
         let ki_norm = I0F32::from_num(ki * ts * ts);
@@ -75,7 +89,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
         let filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
 
         Self {
-            term,
+            terms,
             acc: FixedI32::<FRAC>::ZERO,
             error: FixedI32::<FRAC>::ZERO,
 
@@ -91,13 +105,15 @@ impl<const FRAC: i32> Kalman<FRAC> {
         let error = v - self.acc;
 
         let mut acc = FixedI32::<FRAC>::ZERO;
-        acc += self.term.update(error);
+        for term in &mut self.terms {
+            acc += term.update(error);
+        }
 
         self.acc = acc;
         self.error = error;
 
         // park transform
-        let dq = self.term.alpha_beta.to_dq(self.sin, self.cos);
+        let dq = self.terms[0].alpha_beta.to_dq(self.sin, self.cos);
 
         // PI control loop
         self.f = self.fref + self.filter.update(dq.q);
