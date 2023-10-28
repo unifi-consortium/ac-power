@@ -101,7 +101,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
             filter,
         }
     }
-    pub fn update(&mut self, v: FixedI32<FRAC>) -> u32 {
+    pub fn update(&mut self, v: FixedI32<FRAC>) -> i32 {
         // kalman feedback section
         let error = v - self.acc;
         let mut acc = FixedI32::<FRAC>::ZERO;
@@ -124,6 +124,6 @@ impl<const FRAC: i32> Kalman<FRAC> {
         let ratio: I1F31 = self.fref.wide_div(self.f).cast();
         let mut lmt = FixedI32::<0>::from_bits(10_000);
         lmt *= ratio;
-        lmt.to_bits() as u32
+        lmt.to_bits()
     }
 }
