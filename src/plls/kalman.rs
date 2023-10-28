@@ -122,7 +122,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
 
         // calculate the next sample time
         let ratio: FixedI32<30> = self.fref.wide_div(self.f).cast();
-        let mut lmt = FixedI32::<16>::from_bits(10_000 << 4);
+        let mut lmt = FixedI32::<16>::from_bits(10_000 << 16);
         lmt *= ratio;
         lmt.to_bits()
     }
