@@ -2,11 +2,10 @@ use crate::plls::filter::PiFilter;
 use crate::reference_frames::AlphaBeta;
 use crate::trig::sin_cos;
 use az::Cast;
-
 use fixed::types::I0F32;
 use fixed::types::I0F64;
 use fixed::types::I1F31;
-use fixed::{FixedI32, FixedI64};
+use fixed::FixedI32;
 use heapless::Vec;
 
 #[derive(Debug, Copy, Clone)]
@@ -66,9 +65,8 @@ pub struct Kalman<const FRAC: i32> {
 }
 
 impl<const FRAC: i32> Kalman<FRAC> {
-    pub fn new(fref: f32, kp: f32, ki: f32, max_integral: f32, ts: f32) -> Self {
-        // let terms = Term::new(fref, ts, 0.08, -0.04);
-
+    pub fn new(fref: f32, vref: f32, tset: f32, gamma: f32, max_integral: f32, ts: f32) -> Self {
+        // create kalman oscillators
         let mut terms: Vec<Term<FRAC>, 12> = Vec::new();
         terms
             .push(Term::new(fref, ts, 0.08700214, -0.01708236))
@@ -83,6 +81,11 @@ impl<const FRAC: i32> Kalman<FRAC> {
             .push(Term::new(7.0 * fref, ts, 0.03887693, -0.04452462))
             .unwrap();
 
+        // calculate the kp and ki of the PI controller
+        let kp = 8.0 / (tset * vref);
+        let ki = 16.0 / (gamma * gamma * tset * tset * vref);
+
+        // normalize terms to the sampling frequency and conver to fixed-point
         let fref_norm = I0F32::from_num(fref * ts);
         let kp_norm = I0F32::from_num(kp * ts);
         let ki_norm = I0F32::from_num(ki * ts * ts);
@@ -92,7 +95,6 @@ impl<const FRAC: i32> Kalman<FRAC> {
         Self {
             terms,
             acc: FixedI32::<FRAC>::ZERO,
-
             theta: I0F32::ZERO,
             sin: I1F31::ZERO,
             cos: I1F31::MAX,
@@ -121,6 +123,8 @@ impl<const FRAC: i32> Kalman<FRAC> {
         (self.sin, self.cos) = sin_cos(self.theta);
 
         // calculate the next sample time
+        // This division is expensive, but critical for accurate frequency measurement
+        // TODO: Consider optimizing
         let ratio: FixedI32<30> = self.fref.wide_div(self.f).cast();
         let mut lmt = FixedI32::<16>::from_bits(10_000 << 16);
         lmt *= ratio;
