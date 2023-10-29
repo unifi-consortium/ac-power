@@ -3,7 +3,7 @@ use crate::plls::PhaseLockedLoop;
 use crate::reference_frames::Abc;
 use crate::reference_frames::AlphaBeta;
 use crate::trig::{chebyshev, sin_cos};
-use fixed::types::{I0F32, I0F64, I1F31};
+use fixed::types::{I0F32, I1F31};
 
 pub struct Dsf<const FRAC: i32> {
     pub fref: I0F32,
@@ -30,7 +30,7 @@ impl<const FRAC: i32> PhaseLockedLoop<FRAC> for Dsf<FRAC> {
         let fref_norm = I0F32::from_num(fref * ts);
         let kp_norm = I0F32::from_num(kp * ts);
         let ki_norm = I0F32::from_num(ki * ts * ts);
-        let max_integral_norm = I0F64::from_num(max_integral * ts);
+        let max_integral_norm = I0F32::from_num(max_integral * ts);
 
         let filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
         Self {

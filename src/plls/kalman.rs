@@ -3,7 +3,6 @@ use crate::reference_frames::AlphaBeta;
 use crate::trig::sin_cos;
 use az::Cast;
 use fixed::types::I0F32;
-use fixed::types::I0F64;
 use fixed::types::I1F31;
 use fixed::FixedI32;
 use heapless::Vec;
@@ -63,6 +62,7 @@ pub struct Kalman<const FRAC: i32> {
     cos: I1F31,
     phase_filter: PiFilter,
     clock_filter: PiFilter,
+    lmt_error_integal: FixedI32<16>,
 }
 
 impl<const FRAC: i32> Kalman<FRAC> {
@@ -70,16 +70,16 @@ impl<const FRAC: i32> Kalman<FRAC> {
         // create kalman oscillators
         let mut terms: Vec<Term<FRAC>, 12> = Vec::new();
         terms
-            .push(Term::new(fref, ts, 0.08700214, -0.01708236))
+            .push(Term::new(fref, ts, 0.03605756, 0.00156288))
             .unwrap();
         terms
-            .push(Term::new(3.0 * fref, ts, 0.05441161, -0.02309186))
+            .push(Term::new(3.0 * fref, ts, 0.06011409, -0.00214521))
             .unwrap();
         terms
-            .push(Term::new(5.0 * fref, ts, 0.05151601, -0.02898203))
+            .push(Term::new(5.0 * fref, ts, 0.05725374, -0.01844762))
             .unwrap();
         terms
-            .push(Term::new(7.0 * fref, ts, 0.03887693, -0.04452462))
+            .push(Term::new(7.0 * fref, ts, 0.04530465, -0.03957013))
             .unwrap();
 
         // calculate the gains of the phase filter
@@ -87,18 +87,18 @@ impl<const FRAC: i32> Kalman<FRAC> {
         let ki = 16.0 / (gamma * gamma * tset * tset * vref);
 
         // calculate the gains of clock filter
-        let ka = 50.0 * 2e-3;
-        let k = 50.0;
+        let ka = 10.0 * 5e-3;
+        let kt = 10.0 * ts;
 
         // normalize terms to the sampling frequency and conver to fixed-point
         let fref_norm = I0F32::from_num(fref * ts);
         let kp_norm = I0F32::from_num(kp * ts);
         let ki_norm = I0F32::from_num(ki * ts * ts);
-        let ka_norm = I0F32::from_num(ka * ts);
-        let k_norm = I0F32::from_num(k * ts * ts);
-        let max_integral_norm = I0F64::from_num(max_integral * ts);
+        let ka_norm = I0F32::from_num(ka);
+        let kt_norm = I0F32::from_num(kt);
+        let max_integral_norm = I0F32::from_num(max_integral * ts);
         let phase_filter = PiFilter::new(kp_norm, ki_norm, max_integral_norm);
-        let clock_filter = PiFilter::new(ka_norm, k_norm, max_integral_norm);
+        let clock_filter = PiFilter::new(ka_norm, kt_norm, max_integral_norm);
 
         Self {
             terms,
@@ -110,6 +110,7 @@ impl<const FRAC: i32> Kalman<FRAC> {
             f: fref_norm,
             phase_filter,
             clock_filter,
+            lmt_error_integal: FixedI32::<16>::ZERO,
         }
     }
     pub fn update(&mut self, v: FixedI32<FRAC>) -> u32 {
@@ -126,21 +127,46 @@ impl<const FRAC: i32> Kalman<FRAC> {
 
         // PI control loop
         let f_error = self.phase_filter.update(dq.q);
-        self.f = self.fref + f_error;
 
         // update the phase info
-        self.theta = self.theta.wrapping_add(self.f);
+        self.theta = self.theta.wrapping_add(self.fref + f_error);
         (self.sin, self.cos) = sin_cos(self.theta);
 
         // update the sample rate
-        let f_eff = self.fref + self.clock_filter.update(f_error);
+        self.f = self.fref + self.clock_filter.update(f_error);
 
         // calculate the next sample time
         // This division is expensive, but critical for accurate frequency measurement
         // TODO: Consider optimizing
-        let ratio: FixedI32<30> = f_eff.wide_div(self.f).cast();
-        let mut lmt = FixedI32::<16>::from_bits(10_000 << 16);
-        lmt *= ratio;
-        lmt.to_bits() as u32
+        let ratio: FixedI32<30> = self.fref.wide_div(self.f).cast();
+        let mut lmt_wide = FixedI32::<16>::from_bits(10_000 << 16);
+        lmt_wide *= ratio;
+
+        let mut lmt = (lmt_wide.to_bits() >> 16) as u32;
+        let lmt_error = lmt_wide.rem_euclid_int(1);
+        self.lmt_error_integal += lmt_error;
+        if self.lmt_error_integal > FixedI32::<16>::ONE {
+            self.lmt_error_integal -= FixedI32::<16>::ONE;
+            lmt += 1;
+        }
+        lmt
+
+        // // calculate the full resolution LMT value
+        // let mut lmt32 = umull(self.lmt_center, omega_ratio);
+        // if lmt32 < self.lmt_min {
+        //     lmt32 = self.lmt_min;
+        // }
+
+        // // my code does not quite match Bony's here
+        // let mut lmt = (lmt32 >> 16) as u16;
+        // let lmt_error = (lmt32 % 0x10000) as u16;
+        // let (lmt_error_integal, overflow) = self.lmt_error_integal.overflowing_add(lmt_error);
+        // self.lmt_error_integal = lmt_error_integal;
+
+        // if overflow {
+        //     lmt += 1;
+        // }
+
+        // return lmt;
     }
 }
