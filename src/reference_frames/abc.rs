@@ -1,7 +1,13 @@
-use crate::reference_frames::Abc;
+use core::ops::{Add, Sub};
 use fixed::FixedI32;
 
-use core::ops::{Add, Sub};
+// Unbalanced reference frames
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Abc<const FRAC: i32> {
+    pub a: FixedI32<FRAC>,
+    pub b: FixedI32<FRAC>,
+    pub c: FixedI32<FRAC>,
+}
 
 impl<const FRAC: i32> Add<Abc<FRAC>> for Abc<FRAC> {
     fn add(self, other: Abc<FRAC>) -> Abc<FRAC> {
@@ -50,7 +56,7 @@ mod tests {
     use fixed::types::I11F21;
 
     #[test]
-    fn abc_addition() {
+    fn addition() {
         let abc_pos = Abc {
             a: I11F21::from_num(200),
             b: I11F21::from_num(-100),
@@ -73,7 +79,7 @@ mod tests {
     }
 
     #[test]
-    fn abc_subtraction() {
+    fn subtraction() {
         let abc_pos = Abc {
             a: I11F21::from_num(200),
             b: I11F21::from_num(-100),
@@ -96,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn abc_add_bias() {
+    fn add_bias() {
         let abc_pos = Abc {
             a: I11F21::from_num(200),
             b: I11F21::from_num(-100),
@@ -114,7 +120,7 @@ mod tests {
     }
 
     #[test]
-    fn abc_subtract_bias() {
+    fn subtract_bias() {
         let abc_pos = Abc {
             a: I11F21::from_num(200),
             b: I11F21::from_num(-100),

@@ -181,7 +181,7 @@ mod tests {
     use fixed::FixedI32;
 
     #[test]
-    fn clark_transform() {
+    fn clarke_transform() {
         let theta = I0F32::from_num(20. / 360.);
         let amplitude = I11F21::from_num(480.0);
         let polar = Polar { theta, amplitude };
