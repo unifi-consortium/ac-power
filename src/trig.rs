@@ -15,30 +15,21 @@ pub fn sin_cos(theta: I0F32) -> (I1F31, I1F31) {
     (sin_val, cos_val)
 }
 
+// Use Ptolemy's theorem to rotate a sin/cos pair
+pub fn rotate(sina: I1F31, cosa: I1F31, sinb: I1F31, cosb: I1F31) -> (I1F31, I1F31) {
+    let sin = sina * cosb + cosa * sinb;
+    let cos = cosa * cosb - sina * sinb;
+    (sin, cos)
+}
+
 /// Shifts sin/cos values 120 degrees right (+2pi/3)
-///
-/// Use Ptolemy's theorem rather than a new sin/cos lookup
 pub fn shift_right_120(sin: I1F31, cos: I1F31) -> (I1F31, I1F31) {
-    let mut sin_shifted = sin * (-ONE_HALF);
-    sin_shifted.saturating_mul_acc(SQRT_3_OVER_2, cos);
-
-    let mut cos_shifted = cos * (-ONE_HALF);
-    cos_shifted.saturating_mul_acc(-SQRT_3_OVER_2, sin);
-
-    (sin_shifted, cos_shifted)
+    rotate(sin, cos, SQRT_3_OVER_2, -ONE_HALF)
 }
 
 /// Shifts sin/cos values 120 degrees left (-2pi/3)
-///
-/// Use Ptolemy's theorem rather than a new sin/cos lookup
 pub fn shift_left_120(sin: I1F31, cos: I1F31) -> (I1F31, I1F31) {
-    let mut sin_shifted = sin * (-ONE_HALF);
-    sin_shifted.saturating_mul_acc(-SQRT_3_OVER_2, cos);
-
-    let mut cos_shifted = cos * (-ONE_HALF);
-    cos_shifted.saturating_mul_acc(SQRT_3_OVER_2, sin);
-
-    (sin_shifted, cos_shifted)
+    rotate(sin, cos, -SQRT_3_OVER_2, -ONE_HALF)
 }
 
 // use chebyshev method to calculate sin(Nx) and cos(Nx) from cos(x), sin((N-1)x), cos((N-1)x), sin((N-2)x), and cos((N-2)x)

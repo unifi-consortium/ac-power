@@ -5,7 +5,6 @@ use core::convert::From;
 use fixed::types::I1F31;
 use fixed::FixedI32;
 
-// polar to Abc transformation
 impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
     fn from(polar: Polar<FRAC>) -> Self {
         let (sin, cos) = sin_cos(polar.theta);
@@ -22,7 +21,6 @@ impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
     }
 }
 
-// abc to alpha beta (clarke) transform
 impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
@@ -38,7 +36,6 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
     }
 }
 
-// abc to alpha beta (clarke) transform
 impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta0<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut alpha = abc.a;
@@ -59,7 +56,6 @@ impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta0<FRAC> {
     }
 }
 
-// alpha-beta to dq0 (park) transform
 impl<const FRAC: i32> AlphaBeta<FRAC> {
     // DQ0 Transform
     pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
@@ -78,7 +74,6 @@ impl<const FRAC: i32> AlphaBeta<FRAC> {
         }
     }
 
-    // DQ0 Transform
     pub fn to_dq(&self, sin: I1F31, cos: I1F31) -> Dq<FRAC> {
         let mut d = self.alpha;
         d *= sin;
@@ -93,7 +88,6 @@ impl<const FRAC: i32> AlphaBeta<FRAC> {
 }
 
 impl<const FRAC: i32> Abc<FRAC> {
-    // DQ Transform
     pub fn to_dq(&self, sin: I1F31, cos: I1F31) -> Dq<FRAC> {
         /* sin and cos with 120 degree offsets */
         let (sin_m, cos_m) = shift_left_120(sin, cos);
@@ -114,7 +108,6 @@ impl<const FRAC: i32> Abc<FRAC> {
         Dq { d, q }
     }
 
-    // DQ0 Transform
     pub fn to_dq0(&self, sin: I1F31, cos: I1F31) -> Dq0<FRAC> {
         let dq = self.to_dq(sin, cos);
 
@@ -126,7 +119,6 @@ impl<const FRAC: i32> Abc<FRAC> {
     }
 }
 
-// polar to Abc transformation
 impl<const FRAC: i32> From<Abc<FRAC>> for FixedI32<FRAC> {
     fn from(abc: Abc<FRAC>) -> Self {
         let mut zero = abc.a;
@@ -138,7 +130,6 @@ impl<const FRAC: i32> From<Abc<FRAC>> for FixedI32<FRAC> {
 }
 
 impl<const FRAC: i32> Dq<FRAC> {
-    // DQ0 Transform
     pub fn to_abc(&self, sin: I1F31, cos: I1F31) -> Abc<FRAC> {
         /* sin and cos with 120 degree offsets */
         let (sin_m, cos_m) = shift_left_120(sin, cos);
@@ -161,7 +152,6 @@ impl<const FRAC: i32> Dq<FRAC> {
 }
 
 impl<const FRAC: i32> Dq0<FRAC> {
-    // DQ0 Transform
     pub fn to_abc(&self, sin: I1F31, cos: I1F31) -> Abc<FRAC> {
         Dq::<FRAC> {
             d: self.d,
