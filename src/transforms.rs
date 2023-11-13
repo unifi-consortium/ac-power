@@ -1,13 +1,13 @@
 use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
 use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
-use crate::trig::{shift_left_120, shift_right_120, sin_cos};
+use crate::trig::{cos_sin, shift_left_120, shift_right_120};
 use core::convert::From;
 use fixed::types::I1F31;
 use fixed::FixedI32;
 
 impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
     fn from(polar: Polar<FRAC>) -> Self {
-        let (sin, cos) = sin_cos(polar.theta);
+        let (sin, cos) = cos_sin(polar.theta);
         let (sin_m, _) = shift_left_120(sin, cos);
         let (sin_p, _) = shift_right_120(sin, cos);
 
@@ -189,7 +189,7 @@ mod tests {
         let polar = Polar { theta, amplitude };
         let abc = Abc::from(polar);
 
-        let (sin, cos) = sin_cos(theta);
+        let (sin, cos) = cos_sin(theta);
         let dq0 = abc.to_dq0(sin, cos);
 
         println!("{:?}", dq0);
