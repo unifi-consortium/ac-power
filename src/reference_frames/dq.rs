@@ -1,4 +1,6 @@
+use crate::trig::rotate;
 use core::ops::{Add, Sub};
+use fixed::types::I1F31;
 use fixed::FixedI32;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -90,4 +92,15 @@ impl<const FRAC: i32> Sub<Dq<FRAC>> for Dq0<FRAC> {
         Self { d, q, zero }
     }
     type Output = Dq0<FRAC>;
+}
+
+impl<const FRAC: i32> Dq<FRAC> {
+    pub const ZERO: Dq<FRAC> = Dq::<FRAC> {
+        d: FixedI32::<FRAC>::ZERO,
+        q: FixedI32::<FRAC>::ZERO,
+    };
+    pub fn rotate(&self, cos: I1F31, sin: I1F31) -> Dq<FRAC> {
+        let (d, q) = rotate(self.d, self.q, cos, sin);
+        Dq { d, q }
+    }
 }

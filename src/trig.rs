@@ -26,8 +26,6 @@ pub fn rotate<const FRAC: i32>(
     yr *= cos;
     yr.mul_acc(x, sin);
 
-    // let sin = sina * cosb + cosa * sinb;
-    // let cos = cosa * cosb - sina * sinb;
     (xr, yr)
 }
 
@@ -93,33 +91,33 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn test_chebyshev() {
-    //     let angle: f64 = 0.2;
-    //     let (cos0, sin0) = (I1F31::ZERO, I1F31::MAX);
-    //     let (cos1, sin1) = cos_sin(I0F32::from_num(angle));
-    //     let (cos2, sin2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
-    //     let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
+    #[test]
+    fn test_chebyshev() {
+        let angle: f64 = 0.2;
+        let (cos0, sin0) = (I1F31::MAX, I1F31::ZERO);
+        let (cos1, sin1) = cos_sin(I0F32::from_num(angle));
+        let (cos2, sin2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
+        let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
 
-    //     assert_abs_diff_eq!(
-    //         f64::from(sin2),
-    //         (2.0 * 2.0 * PI * angle).sin(),
-    //         epsilon = 0.0001
-    //     );
-    //     assert_abs_diff_eq!(
-    //         f64::from(cos2),
-    //         (2.0 * 2.0 * PI * angle).cos(),
-    //         epsilon = 0.0001
-    //     );
-    //     assert_abs_diff_eq!(
-    //         f64::from(sin3),
-    //         (3.0 * 2.0 * PI * angle).sin(),
-    //         epsilon = 0.0001
-    //     );
-    //     assert_abs_diff_eq!(
-    //         f64::from(cos3),
-    //         (3.0 * 2.0 * PI * angle).cos(),
-    //         epsilon = 0.0001
-    //     );
-    // }
+        assert_abs_diff_eq!(
+            f64::from(sin2),
+            (2.0 * 2.0 * PI * angle).sin(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(cos2),
+            (2.0 * 2.0 * PI * angle).cos(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(sin3),
+            (3.0 * 2.0 * PI * angle).sin(),
+            epsilon = 0.0001
+        );
+        assert_abs_diff_eq!(
+            f64::from(cos3),
+            (3.0 * 2.0 * PI * angle).cos(),
+            epsilon = 0.0001
+        );
+    }
 }
