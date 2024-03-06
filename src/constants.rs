@@ -1,8 +1,7 @@
-use fixed::types::I1F31;
-
-// define constants fort I1F31
-pub const ONE_THIRD: I1F31 = I1F31::from_bits(0x2aaa_aaab);
-pub const TWO_THIRDS: I1F31 = I1F31::from_bits(0x5555_5555);
-pub const SQRT_3_OVER_3: I1F31 = I1F31::from_bits(0x49e6_9d16);
-pub const ONE_HALF: I1F31 = I1F31::from_bits(0x4000_0000);
-pub const SQRT_3_OVER_2: I1F31 = I1F31::from_bits(0x6ed9_eba1);
+// define constants for f32
+pub const ONE_THIRD: f32 = 0.3333333333333333;
+pub const TWO_THIRDS: f32 = 0.6666666666666666;
+pub const SQRT_3_OVER_3: f32 = 0.5773502691896257;
+pub const ONE_HALF: f32 = 0.5;
+pub const SQRT_3_OVER_2: f32 = 0.8660254037844386;
+// pub const SQRT_3_OVER_2: f32 = 1.224744871391589;

@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-fixed = "2.0.0-alpha.12"
 idsp = "0.11.0"
 heapless = "0.7.16"
 az = "1.2.1"

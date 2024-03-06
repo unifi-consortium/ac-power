@@ -1,12 +1,9 @@
 use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
 use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
 use crate::trig::{cos_sin, shift_left_120, shift_right_120};
-use core::convert::From;
-use fixed::types::I1F31;
-use fixed::FixedI32;
 
-impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
-    fn from(polar: Polar<FRAC>) -> Self {
+impl From<Polar> for Abc {
+    fn from(polar: Polar) -> Self {
         let (cos, sin) = cos_sin(polar.theta);
         let (_, sin_m) = shift_left_120(cos, sin);
         let (_, sin_p) = shift_right_120(cos, sin);
@@ -21,139 +18,93 @@ impl<const FRAC: i32> From<Polar<FRAC>> for Abc<FRAC> {
     }
 }
 
-impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta<FRAC> {
-    fn from(abc: Abc<FRAC>) -> Self {
-        let mut alpha = abc.a;
-        alpha *= TWO_THIRDS;
-        alpha.mul_acc(abc.b, -ONE_THIRD);
-        alpha.mul_acc(abc.c, -ONE_THIRD);
-
-        let mut beta = abc.b;
-        beta *= SQRT_3_OVER_3;
-        beta.mul_acc(abc.c, -SQRT_3_OVER_3);
+impl From<Abc> for AlphaBeta {
+    fn from(abc: Abc) -> Self {
+        let alpha = (abc.a * TWO_THIRDS) - (abc.b * ONE_THIRD) - (abc.c * ONE_THIRD);
+        let beta = (abc.b * SQRT_3_OVER_3) - (abc.c * SQRT_3_OVER_3);
 
         Self { alpha, beta }
     }
 }
 
-impl<const FRAC: i32> From<Abc<FRAC>> for AlphaBeta0<FRAC> {
-    fn from(abc: Abc<FRAC>) -> Self {
-        let mut alpha = abc.a;
-        alpha *= TWO_THIRDS;
-        alpha.mul_acc(abc.b, -ONE_THIRD);
-        alpha.mul_acc(abc.c, -ONE_THIRD);
-
-        let mut beta = abc.b;
-        beta *= SQRT_3_OVER_3;
-        beta.mul_acc(abc.c, -SQRT_3_OVER_3);
-
-        let mut zero = abc.a;
-        zero *= ONE_THIRD;
-        zero.mul_acc(abc.b, ONE_THIRD);
-        zero.mul_acc(abc.c, ONE_THIRD);
+impl From<Abc> for AlphaBeta0 {
+    fn from(abc: Abc) -> Self {
+        let alpha = (abc.a * TWO_THIRDS) - (abc.b * ONE_THIRD) - (abc.c * ONE_THIRD);
+        let beta = (abc.b * SQRT_3_OVER_3) - (abc.c * SQRT_3_OVER_3);
+        let zero = ONE_THIRD * (abc.a + abc.b + abc.c);
 
         Self { alpha, beta, zero }
     }
 }
 
-impl<const FRAC: i32> AlphaBeta<FRAC> {
+impl AlphaBeta {
     // DQ0 Transform
-    pub fn to_dq0(&self, cos: I1F31, sin: I1F31) -> Dq0<FRAC> {
-        let mut d = self.alpha;
-        d *= sin;
-        d.mul_acc(-self.beta, cos);
+    pub fn to_dq0(&self, cos: f32, sin: f32) -> Dq0 {
+        let d = (self.alpha * sin) - (self.beta * cos);
+        let q = (self.alpha * cos) + (self.beta * sin);
 
-        let mut q = self.alpha;
-        q *= cos;
-        q.mul_acc(self.beta, sin);
-
-        Dq0 {
-            d,
-            q,
-            zero: FixedI32::<FRAC>::ZERO,
-        }
+        Dq0 { d, q, zero: 0.0 }
     }
 
-    pub fn to_dq(&self, cos: I1F31, sin: I1F31) -> Dq<FRAC> {
-        let mut d = self.alpha;
-        d *= sin;
-        d.mul_acc(-self.beta, cos);
-
-        let mut q = self.alpha;
-        q *= cos;
-        q.mul_acc(self.beta, sin);
+    pub fn to_dq(&self, cos: f32, sin: f32) -> Dq {
+        let d = (self.alpha * sin) - (self.beta * cos);
+        let q = (self.alpha * cos) + (self.beta * sin);
 
         Dq { d, q }
     }
 }
 
-impl<const FRAC: i32> Abc<FRAC> {
-    pub fn to_dq(&self, cos: I1F31, sin: I1F31) -> Dq<FRAC> {
+impl Abc {
+    pub fn to_dq(&self, cos: f32, sin: f32) -> Dq {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
 
-        let mut d = self.a;
-        d *= sin;
-        d.mul_acc(self.b, sin_m);
-        d.mul_acc(self.c, sin_p);
-        d *= TWO_THIRDS;
-
-        let mut q = self.a;
-        q *= cos;
-        q.mul_acc(self.b, cos_m);
-        q.mul_acc(self.c, cos_p);
-        q *= TWO_THIRDS;
+        let d = TWO_THIRDS * ((self.a * sin) + (self.b * sin_m) + (self.b * sin_p));
+        let q = TWO_THIRDS * ((self.a * cos) + (self.b * cos_m) + (self.b * cos_p));
 
         Dq { d, q }
     }
 
-    pub fn to_dq0(&self, cos: I1F31, sin: I1F31) -> Dq0<FRAC> {
-        let dq = self.to_dq(cos, sin);
+    pub fn to_dq0(&self, cos: f32, sin: f32) -> Dq0 {
+        /* sin and cos with 120 degree offsets */
+        let (cos_m, sin_m) = shift_left_120(cos, sin);
+        let (cos_p, sin_p) = shift_right_120(cos, sin);
+
+        let d = TWO_THIRDS * ((self.a * sin) + (self.b * sin_m) + (self.b * sin_p));
+        let q = TWO_THIRDS * ((self.a * cos) + (self.b * cos_m) + (self.b * cos_p));
 
         Dq0 {
-            d: dq.d,
-            q: dq.q,
+            d,
+            q,
             zero: (*self).into(),
         }
     }
 }
 
-impl<const FRAC: i32> From<Abc<FRAC>> for FixedI32<FRAC> {
-    fn from(abc: Abc<FRAC>) -> Self {
-        let mut zero = abc.a;
-        zero *= ONE_THIRD;
-        zero.mul_acc(abc.b, ONE_THIRD);
-        zero.mul_acc(abc.c, ONE_THIRD);
-        zero
+impl From<Abc> for f32 {
+    fn from(abc: Abc) -> Self {
+        ONE_THIRD * (abc.a + abc.b + abc.c)
     }
 }
 
-impl<const FRAC: i32> Dq<FRAC> {
-    pub fn to_abc(&self, sin: I1F31, cos: I1F31) -> Abc<FRAC> {
+impl Dq {
+    pub fn to_abc(&self, sin: f32, cos: f32) -> Abc {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
 
-        let mut a = self.d;
-        a *= sin;
-        a.mul_acc(self.q, cos);
-
-        let mut b = self.d;
-        b *= sin_m;
-        b.mul_acc(self.q, cos_m);
-
-        let mut c = self.d;
-        c *= sin_p;
-        c.mul_acc(self.q, cos_p);
+        let a = (self.d * sin) + (self.q * cos);
+        let b = (self.d * sin_m) + (self.q * cos_m);
+        let c = (self.d * sin_p) + (self.q * cos_p);
 
         Abc { a, b, c }
     }
 }
 
-impl<const FRAC: i32> Dq0<FRAC> {
-    pub fn to_abc(&self, cos: I1F31, sin: I1F31) -> Abc<FRAC> {
-        Dq::<FRAC> {
+impl Dq0 {
+    pub fn to_abc(&self, cos: f32, sin: f32) -> Abc {
+        Dq {
             d: self.d,
             q: self.q,
         }
@@ -167,14 +118,14 @@ mod tests {
 
     use super::*;
 
-    use fixed::types::{I0F32, I11F21};
-    use fixed::FixedI32;
-
     #[test]
     fn clarke_transform() {
-        let theta = I0F32::from_num(20. / 360.);
-        let amplitude = I11F21::from_num(480.0);
-        let polar = Polar { theta, amplitude };
+        let degrees = 20. / 360.;
+        let theta = (2147483648. * degrees) as i32;
+        let polar = Polar {
+            theta,
+            amplitude: 480.0,
+        };
         let abc = Abc::from(polar);
 
         let _alpha_beta_zero = AlphaBeta0::from(abc);
@@ -184,9 +135,12 @@ mod tests {
 
     #[test]
     fn dq0_transform() {
-        let theta = I0F32::from_num(20. / 360.);
-        let amplitude = FixedI32::<5>::from_num(12e3);
-        let polar = Polar { theta, amplitude };
+        let degrees = 20. / 360.;
+        let theta = (2147483648. * degrees) as i32;
+        let polar = Polar {
+            theta,
+            amplitude: 480.0,
+        };
         let abc = Abc::from(polar);
 
         let (cos, sin) = cos_sin(theta);

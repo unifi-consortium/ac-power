@@ -1,105 +1,100 @@
 use crate::trig::rotate;
 use core::ops::{Add, Sub};
-use fixed::types::I1F31;
-use fixed::FixedI32;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Dq<const FRAC: i32> {
-    pub d: FixedI32<FRAC>,
-    pub q: FixedI32<FRAC>,
+pub struct Dq {
+    pub d: f32,
+    pub q: f32,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Dq0<const FRAC: i32> {
-    pub d: FixedI32<FRAC>,
-    pub q: FixedI32<FRAC>,
-    pub zero: FixedI32<FRAC>,
+pub struct Dq0 {
+    pub d: f32,
+    pub q: f32,
+    pub zero: f32,
 }
 
-impl<const FRAC: i32> Add<Dq<FRAC>> for Dq<FRAC> {
-    fn add(self, other: Dq<FRAC>) -> Dq<FRAC> {
+impl Add<Dq> for Dq {
+    fn add(self, other: Dq) -> Dq {
         let d = self.d + other.d;
         let q = self.q + other.q;
         Dq { d, q }
     }
-    type Output = Dq<FRAC>;
+    type Output = Dq;
 }
 
-impl<const FRAC: i32> Add<Dq0<FRAC>> for Dq<FRAC> {
-    fn add(self, other: Dq0<FRAC>) -> Dq0<FRAC> {
+impl Add<Dq0> for Dq {
+    fn add(self, other: Dq0) -> Dq0 {
         let d = self.d + other.d;
         let q = self.q + other.q;
         let zero = other.zero;
         Dq0 { d, q, zero }
     }
-    type Output = Dq0<FRAC>;
+    type Output = Dq0;
 }
 
-impl<const FRAC: i32> Add<Dq0<FRAC>> for Dq0<FRAC> {
-    fn add(self, other: Dq0<FRAC>) -> Dq0<FRAC> {
+impl Add<Dq0> for Dq0 {
+    fn add(self, other: Dq0) -> Dq0 {
         let d = self.d + other.d;
         let q = self.q + other.q;
         let zero = self.zero + other.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0<FRAC>;
+    type Output = Dq0;
 }
 
-impl<const FRAC: i32> Add<Dq<FRAC>> for Dq0<FRAC> {
-    fn add(self, other: Dq<FRAC>) -> Dq0<FRAC> {
+impl Add<Dq> for Dq0 {
+    fn add(self, other: Dq) -> Dq0 {
         let d = self.d + other.d;
         let q = self.q + other.q;
         let zero = self.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0<FRAC>;
+    type Output = Dq0;
 }
 
-impl<const FRAC: i32> Sub<Dq<FRAC>> for Dq<FRAC> {
-    fn sub(self, other: Dq<FRAC>) -> Dq<FRAC> {
+impl Sub<Dq> for Dq {
+    fn sub(self, other: Dq) -> Dq {
         let d = self.d - other.d;
         let q = self.q - other.q;
         Self { d, q }
     }
-    type Output = Dq<FRAC>;
+    type Output = Dq;
 }
 
-impl<const FRAC: i32> Sub<Dq0<FRAC>> for Dq<FRAC> {
-    fn sub(self, other: Dq0<FRAC>) -> Dq0<FRAC> {
+impl Sub<Dq0> for Dq {
+    fn sub(self, other: Dq0) -> Dq0 {
         let d = self.d - other.d;
         let q = self.q - other.q;
         let zero = -other.zero;
         Dq0 { d, q, zero }
     }
-    type Output = Dq0<FRAC>;
+    type Output = Dq0;
 }
 
-impl<const FRAC: i32> Sub<Dq0<FRAC>> for Dq0<FRAC> {
-    fn sub(self, other: Dq0<FRAC>) -> Dq0<FRAC> {
+impl Sub<Dq0> for Dq0 {
+    fn sub(self, other: Dq0) -> Dq0 {
         let d = self.d - other.d;
         let q = self.q - other.q;
         let zero = self.zero - other.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0<FRAC>;
+    type Output = Dq0;
 }
 
-impl<const FRAC: i32> Sub<Dq<FRAC>> for Dq0<FRAC> {
-    fn sub(self, other: Dq<FRAC>) -> Dq0<FRAC> {
+impl Sub<Dq> for Dq0 {
+    fn sub(self, other: Dq) -> Dq0 {
         let d = self.d - other.d;
         let q = self.q - other.q;
         let zero = self.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0<FRAC>;
+    type Output = Dq0;
 }
 
-impl<const FRAC: i32> Dq<FRAC> {
-    pub const ZERO: Dq<FRAC> = Dq::<FRAC> {
-        d: FixedI32::<FRAC>::ZERO,
-        q: FixedI32::<FRAC>::ZERO,
-    };
-    pub fn rotate(&self, cos: I1F31, sin: I1F31) -> Dq<FRAC> {
+impl Dq {
+    pub const ZERO: Dq = Dq { d: 0.0, q: 0.0 };
+    pub fn rotate(&self, cos: f32, sin: f32) -> Dq {
         let (d, q) = rotate(self.d, self.q, cos, sin);
         Dq { d, q }
     }
