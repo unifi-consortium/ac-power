@@ -48,6 +48,14 @@ impl Sub<f32> for Abc {
     type Output = Abc;
 }
 
+impl Abc {
+    pub const ZERO: Abc = Abc {
+        a: 0.0,
+        b: 0.0,
+        c: 0.0,
+    };
+}
+
 #[cfg(test)]
 mod tests {
 

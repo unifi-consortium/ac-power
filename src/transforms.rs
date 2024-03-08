@@ -89,7 +89,7 @@ impl From<Abc> for f32 {
 }
 
 impl Dq {
-    pub fn to_abc(&self, sin: f32, cos: f32) -> Abc {
+    pub fn to_abc(&self, cos: f32, sin: f32) -> Abc {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
