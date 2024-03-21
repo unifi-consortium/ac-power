@@ -28,6 +28,14 @@ impl Add<f32> for Abc {
     type Output = Abc;
 }
 
+impl Add<Abc> for f32 {
+    type Output = Abc;
+
+    fn add(self, rhs: Abc) -> Abc {
+        rhs + self
+    }
+}
+
 impl Sub<Abc> for Abc {
     fn sub(self, other: Abc) -> Abc {
         let a = self.a - other.a;
@@ -46,6 +54,14 @@ impl Sub<f32> for Abc {
         Self { a, b, c }
     }
     type Output = Abc;
+}
+
+impl Sub<Abc> for f32 {
+    type Output = Abc;
+
+    fn sub(self, rhs: Abc) -> Abc {
+        rhs - self
+    }
 }
 
 impl Abc {
