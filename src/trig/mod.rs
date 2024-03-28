@@ -14,7 +14,7 @@
 //    limitations under the License.
 
 mod types;
-pub use types::Theta;
+pub use types::{Cos, Sin, Theta};
 
 use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 
@@ -30,16 +30,16 @@ use idsp::cossin;
 /// let theta = Theta::from_degrees(180.0);
 /// let (cos, sin) = cos_sin(theta);
 /// ```
-pub fn cos_sin(theta: Theta) -> (f32, f32) {
+pub fn cos_sin(theta: Theta) -> (Cos, Sin) {
     // use the idsp library cos/sin function
     let (cos, sin) = cossin(theta.0);
 
-    // convert the result to floating point
-    ((cos as f32) / 2147483648., (sin as f32) / 2147483648.)
+    // converter to the Cos and Sin newtypes
+    (cos.into(), sin.into())
 }
 
 // Use Ptolemy's theorem to rotate a vector
-pub fn rotate(x: f32, y: f32, cos: f32, sin: f32) -> (f32, f32) {
+pub fn rotate(x: f32, y: f32, cos: Cos, sin: Sin) -> (f32, f32) {
     let xr = x * cos - y * sin;
     let yr = x * sin + y * cos;
 
@@ -47,21 +47,33 @@ pub fn rotate(x: f32, y: f32, cos: f32, sin: f32) -> (f32, f32) {
 }
 
 /// Shifts sin/cos values 120 degrees right (+2pi/3)
-pub fn shift_right_120(cos: f32, sin: f32) -> (f32, f32) {
-    rotate(cos, sin, -ONE_HALF, SQRT_3_OVER_2)
+pub fn shift_right_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
+    let (cosr, sinr) = rotate(
+        cos.into(),
+        sin.into(),
+        (-ONE_HALF).into(),
+        SQRT_3_OVER_2.into(),
+    );
+    (cosr.into(), sinr.into())
 }
 
 /// Shifts sin/cos values 120 degrees left (-2pi/3)
-pub fn shift_left_120(cos: f32, sin: f32) -> (f32, f32) {
-    rotate(cos, sin, -ONE_HALF, -SQRT_3_OVER_2)
+pub fn shift_left_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
+    let (cosr, sinr) = rotate(
+        cos.into(),
+        sin.into(),
+        (-ONE_HALF).into(),
+        (-SQRT_3_OVER_2).into(),
+    );
+    (cosr.into(), sinr.into())
 }
 
 // use chebyshev method to calculate sin(Nx) and cos(Nx) from cos(x), sin((N-1)x), cos((N-1)x), sin((N-2)x), and cos((N-2)x)
 // https://trans4mind.com/personal_development/mathematics/trigonometry/multipleAnglesRecursiveFormula.htm
-pub fn chebyshev(cos: f32, sin1: f32, cos1: f32, sin2: f32, cos2: f32) -> (f32, f32) {
+pub fn chebyshev(cos: Cos, sin1: Sin, cos1: Cos, sin2: Sin, cos2: Cos) -> (Cos, Sin) {
     let cosn = 2.0 * (cos * cos1) - cos2;
     let sinn = 2.0 * (cos * sin1) - sin2;
-    (cosn, sinn)
+    (cosn.into(), sinn.into())
 }
 
 #[cfg(test)]
@@ -78,8 +90,8 @@ mod tests {
         let theta = Theta::from_radians(radians);
         let (cos, sin) = cos_sin(theta);
 
-        assert_abs_diff_eq!(sin, radians.sin(), epsilon = 0.0001);
-        assert_abs_diff_eq!(cos, radians.cos(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f32::from(sin), radians.sin(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f32::from(cos), radians.cos(), epsilon = 0.0001);
     }
 
     #[test]
@@ -90,12 +102,12 @@ mod tests {
         let (cos_shifted, sin_shifted) = shift_left_120(cos, sin);
 
         assert_abs_diff_eq!(
-            sin_shifted,
+            f32::from(sin_shifted),
             (radians - 2.0 * PI / 3.0).sin(),
             epsilon = 0.0001
         );
         assert_abs_diff_eq!(
-            cos_shifted,
+            f32::from(cos_shifted),
             (radians - 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
@@ -109,12 +121,12 @@ mod tests {
         let (cos_shifted, sin_shifted) = shift_right_120(cos, sin);
 
         assert_abs_diff_eq!(
-            sin_shifted,
+            f32::from(sin_shifted),
             (radians + 2.0 * PI / 3.0).sin(),
             epsilon = 0.0001
         );
         assert_abs_diff_eq!(
-            cos_shifted,
+            f32::from(cos_shifted),
             (radians + 2.0 * PI / 3.0).cos(),
             epsilon = 0.0001
         );
@@ -124,14 +136,14 @@ mod tests {
     fn test_chebyshev() {
         let radians: f32 = 1.2;
         let theta = Theta::from_radians(radians);
-        let (cos0, sin0) = (1.0, 0.0);
+        let (cos0, sin0) = (Cos::from(1.0), Sin::from(0.0));
         let (cos1, sin1) = cos_sin(theta);
         let (cos2, sin2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
         let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
 
-        assert_abs_diff_eq!(sin2, (2.0 * radians).sin(), epsilon = 0.0001);
-        assert_abs_diff_eq!(cos2, (2.0 * radians).cos(), epsilon = 0.0001);
-        assert_abs_diff_eq!(sin3, (3.0 * radians).sin(), epsilon = 0.0001);
-        assert_abs_diff_eq!(cos3, (3.0 * radians).cos(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f32::from(sin2), (2.0 * radians).sin(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f32::from(cos2), (2.0 * radians).cos(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f32::from(sin3), (3.0 * radians).sin(), epsilon = 0.0001);
+        assert_abs_diff_eq!(f32::from(cos3), (3.0 * radians).cos(), epsilon = 0.0001);
     }
 }

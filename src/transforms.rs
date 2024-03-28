@@ -1,6 +1,6 @@
 use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
 use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
-use crate::trig::{cos_sin, shift_left_120, shift_right_120};
+use crate::trig::{cos_sin, shift_left_120, shift_right_120, Cos, Sin};
 
 impl From<Polar> for Abc {
     fn from(polar: Polar) -> Self {
@@ -55,7 +55,7 @@ impl AlphaBeta {
 }
 
 impl Abc {
-    pub fn to_dq(&self, cos: f32, sin: f32) -> Dq {
+    pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
@@ -66,7 +66,7 @@ impl Abc {
         Dq { d, q }
     }
 
-    pub fn to_dq0(&self, cos: f32, sin: f32) -> Dq0 {
+    pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0 {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
@@ -89,7 +89,7 @@ impl From<Abc> for f32 {
 }
 
 impl Dq {
-    pub fn to_abc(&self, cos: f32, sin: f32) -> Abc {
+    pub fn to_abc(&self, cos: Cos, sin: Sin) -> Abc {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
@@ -103,7 +103,7 @@ impl Dq {
 }
 
 impl Dq0 {
-    pub fn to_abc(&self, cos: f32, sin: f32) -> Abc {
+    pub fn to_abc(&self, cos: Cos, sin: Sin) -> Abc {
         Dq {
             d: self.d,
             q: self.q,
