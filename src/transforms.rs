@@ -117,11 +117,12 @@ impl Dq0 {
 mod tests {
 
     use super::*;
+    use crate::trig::Theta;
 
     #[test]
     fn clarke_transform() {
         let degrees = 20. / 360.;
-        let theta = (2147483648. * degrees) as i32;
+        let theta = Theta::from_degrees(degrees);
         let polar = Polar {
             theta,
             amplitude: 480.0,
@@ -136,7 +137,7 @@ mod tests {
     #[test]
     fn dq0_transform() {
         let degrees = 20. / 360.;
-        let theta = (2147483648. * degrees) as i32;
+        let theta = Theta::from_degrees(degrees);
         let polar = Polar {
             theta,
             amplitude: 480.0,

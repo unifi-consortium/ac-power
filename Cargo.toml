@@ -2,12 +2,15 @@
 name = "ac-power"
 version = "0.1.0"
 edition = "2018"
+authors = ["donny zimmanck <dzimmanck@enphaseenergy.com"]
+license = "Apache-2.0"
+categories = ["no-std"]
+description = "Reference frames and transforms for ac power analysis"
+keywords = ["ac", "power", "ac-power", "instantaneous power"]
 
 [dependencies]
 idsp = "0.11.0"
-heapless = "0.7.16"
-az = "1.2.1"
+derive_more = "0.99.17"
 
 [dev-dependencies]
-plotlib = "0.5.1"  # used to plot results for debugging
 approx = "0.5.1"
