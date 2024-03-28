@@ -5,7 +5,7 @@ use core::ops::{Mul, MulAssign, Sub};
 use core::panic;
 
 #[derive(Copy, Clone, PartialEq)]
-pub struct Theta(pub i32);
+pub struct Theta(i32);
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Sin(f32);

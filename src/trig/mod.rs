@@ -42,7 +42,7 @@ use idsp::cossin;
 /// ```
 pub fn cos_sin(theta: Theta) -> (Cos, Sin) {
     // use the idsp library cos/sin function
-    let (cos, sin) = cossin(theta.0);
+    let (cos, sin) = cossin(theta.into());
 
     // converter to the Cos and Sin newtypes
     (cos.into(), sin.into())
@@ -125,7 +125,6 @@ pub fn shift_left_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
 /// let (cos2, sin2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
 /// let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
 /// ```
-
 pub fn chebyshev(cos: Cos, sin1: Sin, cos1: Cos, sin2: Sin, cos2: Cos) -> (Cos, Sin) {
     let cosn = 2.0 * (cos * cos1) - cos2;
     let sinn = 2.0 * (cos * sin1) - sin2;
