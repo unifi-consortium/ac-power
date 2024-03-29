@@ -5,6 +5,8 @@ Reference frames, transforms, and trig tools for digital signal processing of AC
 
 `ac-power` is a crate for creating and manipulating [ac power](https://en.wikipedia.org/wiki/AC_power) signals in commonly used reference frames for conducting ac power analysis and signal processing.  The crate is designed for `#![no_std]` so can be used in microcontrollers for devices such as inverters and power meters which need to process ac power signals.  While the library is floating-point, it uses the heavily optimized fixed-point trig from [idsp](https://crates.io/crates/idsp) for efficient execution in constrained environments such as microcontrollers.
 
+![image](https://github.com/enphase/ac-power/assets/93219693/a44adb3a-eba3-4682-a412-0e61c4dabcc4)
+
 # How to use
 
 A very simple use case for this crate would be to calculate real and reactive powers from three-phase voltage and current data
