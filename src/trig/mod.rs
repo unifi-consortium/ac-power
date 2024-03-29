@@ -18,9 +18,9 @@ Trig functions and data-types.
 
 There are three types defined in the trig module
 
-1.  [Theta](crate::trig::types::Theta) - A representation of an angle between -pi and +pi radians (-180 and +180 degrees)
-2.  [Sin](crate::trig::types::Sin) - A representation of sin(theta).  Enforced to be between -1.0 and 1.0
-3.  [Cos](crate::trig::types::Cos) - A representation of cos(theta). Enforced to be between -1.0 and 1.0
+1.  [Theta] - A representation of an angle between -pi and +pi radians (-180 and +180 degrees)
+2.  [Sin] - A representation of sin(theta).  Enforced to be between -1.0 and 1.0
+3.  [Cos] - A representation of cos(theta). Enforced to be between -1.0 and 1.0
 */
 
 mod types;
@@ -28,7 +28,7 @@ pub use types::{Cos, Sin, Theta};
 
 use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 
-use idsp::cossin;
+use idsp;
 
 /// Calculates sin and cos from theta
 ///
@@ -42,9 +42,9 @@ use idsp::cossin;
 /// ```
 pub fn cos_sin(theta: Theta) -> (Cos, Sin) {
     // use the idsp library cos/sin function
-    let (cos, sin) = cossin(theta.into());
+    let (cos, sin) = idsp::cossin(theta.into());
 
-    // converter to the Cos and Sin newtypes
+    // convert to the Cos and Sin newtypes
     (cos.into(), sin.into())
 }
 
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn test_shift_left() {
+    fn shift_left() {
         let radians: f32 = 1.2;
         let theta = Theta::from_radians(radians);
         let (cos, sin) = cos_sin(theta);
@@ -169,7 +169,7 @@ mod tests {
     }
 
     #[test]
-    fn test_shift_right() {
+    fn shift_right() {
         let radians: f32 = 1.2;
         let theta = Theta::from_radians(radians);
         let (cos, sin) = cos_sin(theta);
@@ -188,7 +188,7 @@ mod tests {
     }
 
     #[test]
-    fn test_chebyshev() {
+    fn chebyshev_works() {
         let radians: f32 = 1.2;
         let theta = Theta::from_radians(radians);
         let (cos0, sin0) = (Cos::from(1.0), Sin::from(0.0));

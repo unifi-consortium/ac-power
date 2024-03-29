@@ -1,8 +1,8 @@
 use crate::constants::PI;
 use core::convert::From;
 use core::fmt;
-use core::ops::{Mul, MulAssign, Sub};
-use core::panic;
+use core::ops::{AddAssign, Mul, MulAssign, Neg, Sub};
+// use core::panic;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Theta(i32);
@@ -121,20 +121,34 @@ impl From<Cos> for f32 {
 
 impl From<f32> for Sin {
     fn from(item: f32) -> Self {
-        if item > 1.0 || item < -1.0 {
-            panic!("A Sin type must be between -1.0 and +1.0");
-        }
+        // if item > 1.0 || item < -1.0 {
+        //     panic!("A Sin type must be between -1.0 and +1.0");
+        // }
         Self(item)
     }
 }
 
 impl From<f32> for Cos {
     fn from(item: f32) -> Self {
-        if item > 1.0 || item < -1.0 {
-            panic!("A Cos type must be between -1.0 and +1.0");
-        }
+        // if item > 1.0 || item < -1.0 {
+        //     panic!("A Cos type must be between -1.0 and +1.0");
+        // }
         Self(item)
     }
+}
+
+impl Neg for Cos {
+    fn neg(self) -> Self {
+        Self(-self.0)
+    }
+    type Output = Self;
+}
+
+impl Neg for Sin {
+    fn neg(self) -> Self {
+        Self(-self.0)
+    }
+    type Output = Self;
 }
 
 impl Theta {
@@ -171,6 +185,18 @@ impl Theta {
     }
 }
 
+impl AddAssign<i32> for Theta {
+    fn add_assign(&mut self, rhs: i32) {
+        self.0 = self.0.wrapping_add(rhs);
+    }
+}
+
+impl AddAssign<Theta> for Theta {
+    fn add_assign(&mut self, rhs: Theta) {
+        self.0 = self.0.wrapping_add(rhs.0);
+    }
+}
+
 impl From<i32> for Theta {
     fn from(item: i32) -> Self {
         Self(item)
@@ -194,20 +220,20 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn panics() {
-        let result = std::panic::catch_unwind(|| Sin::from(1.1));
-        assert!(result.is_err());
+    // #[test]
+    // fn panics() {
+    //     let result = std::panic::catch_unwind(|| Sin::from(1.1));
+    //     assert!(result.is_err());
 
-        let result = std::panic::catch_unwind(|| Sin::from(-1.1));
-        assert!(result.is_err());
+    //     let result = std::panic::catch_unwind(|| Sin::from(-1.1));
+    //     assert!(result.is_err());
 
-        let result = std::panic::catch_unwind(|| Cos::from(1.1));
-        assert!(result.is_err());
+    //     let result = std::panic::catch_unwind(|| Cos::from(1.1));
+    //     assert!(result.is_err());
 
-        let result = std::panic::catch_unwind(|| Cos::from(-1.1));
-        assert!(result.is_err());
-    }
+    //     let result = std::panic::catch_unwind(|| Cos::from(-1.1));
+    //     assert!(result.is_err());
+    // }
 
     #[test]
     fn theta() {

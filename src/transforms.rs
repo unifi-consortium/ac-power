@@ -1,19 +1,17 @@
-use crate::constants::{ONE_THIRD, SQRT_3_OVER_3, TWO_THIRDS};
+use crate::constants::{ONE_HALF, ONE_THIRD, SQRT_3_OVER_2, SQRT_3_OVER_3, TWO_THIRDS};
 use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
 use crate::trig::{cos_sin, shift_left_120, shift_right_120, Cos, Sin};
 
 impl From<Polar> for Abc {
     fn from(polar: Polar) -> Self {
         let (cos, sin) = cos_sin(polar.theta);
-        let (_, sin_m) = shift_left_120(cos, sin);
-        let (_, sin_p) = shift_right_120(cos, sin);
+        let sin_m = -cos * SQRT_3_OVER_2 - sin * ONE_HALF;
+        let sin_p = cos * SQRT_3_OVER_2 - sin * ONE_HALF;
 
-        let mut a = polar.amplitude;
-        let mut b = polar.amplitude;
-        let mut c = polar.amplitude;
-        a *= sin;
-        b *= sin_m;
-        c *= sin_p;
+        let a = polar.amplitude * sin;
+        let b = polar.amplitude * sin_m;
+        let c = polar.amplitude * sin_p;
+
         Self { a, b, c }
     }
 }
@@ -39,14 +37,14 @@ impl From<Abc> for AlphaBeta0 {
 
 impl AlphaBeta {
     // DQ0 Transform
-    pub fn to_dq0(&self, cos: f32, sin: f32) -> Dq0 {
+    pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0 {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
 
         Dq0 { d, q, zero: 0.0 }
     }
 
-    pub fn to_dq(&self, cos: f32, sin: f32) -> Dq {
+    pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
 
