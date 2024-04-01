@@ -1,4 +1,5 @@
 use crate::trig::rotate;
+use crate::trig::{Cos, Sin};
 use core::ops::{Add, Sub};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -94,8 +95,16 @@ impl Sub<Dq> for Dq0 {
 
 impl Dq {
     pub const ZERO: Dq = Dq { d: 0.0, q: 0.0 };
-    pub fn rotate(&self, cos: f32, sin: f32) -> Dq {
+    pub fn rotate(&self, cos: Cos, sin: Sin) -> Dq {
         let (d, q) = rotate(self.d, self.q, cos, sin);
         Dq { d, q }
     }
+}
+
+impl Dq0 {
+    pub const ZERO: Dq0 = Dq0 {
+        d: 0.0,
+        q: 0.0,
+        zero: 0.0,
+    };
 }
