@@ -180,6 +180,7 @@ mod ops;
 pub mod reference_frames;
 mod transforms;
 pub mod trig;
+pub mod wavegen;
 
 #[cfg(test)]
 mod tests {}

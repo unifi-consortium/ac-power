@@ -1,4 +1,4 @@
-use core::ops::{Add, Sub};
+use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 // Unbalanced reference frames
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -6,6 +6,18 @@ pub struct Abc {
     pub a: f32,
     pub b: f32,
     pub c: f32,
+}
+
+impl AddAssign<Abc> for Abc {
+    fn add_assign(&mut self, rhs: Abc) {
+        *self = *self + rhs;
+    }
+}
+
+impl SubAssign<Abc> for Abc {
+    fn sub_assign(&mut self, rhs: Abc) {
+        *self = *self - rhs;
+    }
 }
 
 impl Add<Abc> for Abc {

@@ -14,13 +14,69 @@
 //    limitations under the License.
 
 /*!
-Trig functions and data-types.
+This module contains trigometric data-types, methods, and functions useful for ac power signal processing.  The sin, cos, and arctan functions are wrappers around the [idsp](https://crates.io/crates/idsp) crate implementations, which are implemented with optimized fixed-point arithmetic for resource constrained platforms (i.e. microcontrollers).
 
-There are three types defined in the trig module
+# Newtypes
 
-1.  [Theta] - A representation of an angle between -pi and +pi radians (-180 and +180 degrees)
-2.  [Sin] - A representation of sin(theta).  Enforced to be between -1.0 and 1.0
-3.  [Cos] - A representation of cos(theta). Enforced to be between -1.0 and 1.0
+This module defines three new data types which are wrappers around i32 and f32 prmitives
+
+1. [struct Theta(i32)](crate::trig::Theta) - Representation of a phase between -180 and + 180 degres (-pi to + pi)
+2. [struct Sin(f32)](crate::trig::Sin)- Representation of a sin(theta)
+3. [struct Cos(f32)](crate::trig::Cos) - Representation of a cos(theta)
+
+Each newtype contains constructors for instantiating on instance from a variable
+
+```rust
+use ac_power::trig::{Theta, Sin, Cos};
+
+let theta = Theta::from_degrees(90.0);
+let theta = Theta::from_radians(core::f32::consts::PI/2.0);
+let sin = Sin::from_degrees(90.0);
+let cos = Cos::from_radians(core::f32::consts::PI/2.0);
+```
+
+They also include conversions for easily converting to and from the native data types they wrap.
+
+```rust
+use ac_power::trig::{Theta, Sin, Cos};
+
+let theta: Theta = 536870912.into();
+let sin = Sin::from(0.6);
+let sin_as_float: f32 = sin.into();
+```
+
+`Sin` and `Cos` types support arithmetic operations which always return f32.
+
+```rust
+use ac_power::trig::Sin;
+use approx::assert_abs_diff_eq;
+
+let sin = Sin::from_degrees(45.0);
+let x = 1.0 * sin;
+assert_abs_diff_eq!(x, 0.707, epsilon = 0.0001);
+```
+
+The `Theta` data-type supports a wrapping add assign.
+
+```rust
+use ac_power::trig::Theta;
+use approx::assert_abs_diff_eq;
+
+let mut theta = Theta::from_degrees(179.0);
+theta += Theta::from_degrees(2.0);
+assert_abs_diff_eq!(theta.to_degrees(), -179.0, epsilon = 0.0001);
+```
+
+# Functions
+
+The trig modules contains 4 functions which are useful for ac power processing
+
+1. [cos_sin](crate::trig::cos_sin) - Calculate cos and sin from theta simultaneously.
+2. [rotate][crate::trig::rotate] - Function for rotating a vector using Ptolemy's theorem
+3. [shift_right_120] - Function for rotating a vector clockwise by 120 degrees
+4. [shift_left_120] - Function for rotating a vector counter-clockwise by 120 degrees
+5. [chebychev] - calculate sin(Nx) and cos(Nx) using chebychev method
+
 */
 
 mod types;
