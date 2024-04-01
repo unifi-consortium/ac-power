@@ -1,3 +1,4 @@
+use crate::impl_ops;
 use crate::trig::cos_sin;
 use crate::trig::Cos;
 use crate::trig::Theta;
@@ -54,17 +55,13 @@ impl Sin {
     }
 }
 
+// use macro to support most of the arithmetic
+impl_ops!(Sin, f32);
+
 impl From<i32> for Sin {
     fn from(item: i32) -> Self {
         Self((item as f32) / 2147483648.)
     }
-}
-
-impl Mul<f32> for Sin {
-    fn mul(self, other: f32) -> f32 {
-        self.0 * other
-    }
-    type Output = f32;
 }
 
 impl Mul<Sin> for Sin {
@@ -72,48 +69,6 @@ impl Mul<Sin> for Sin {
         self.0 * other.0
     }
     type Output = f32;
-}
-
-impl Mul<Sin> for f32 {
-    fn mul(self, other: Sin) -> f32 {
-        self * other.0
-    }
-    type Output = f32;
-}
-
-impl Sub<Sin> for f32 {
-    fn sub(self, other: Sin) -> f32 {
-        self - other.0
-    }
-    type Output = f32;
-}
-
-impl MulAssign<Sin> for f32 {
-    fn mul_assign(&mut self, other: Sin) {
-        *self *= other.0;
-    }
-}
-
-impl From<Sin> for f32 {
-    fn from(item: Sin) -> Self {
-        item.0
-    }
-}
-
-impl From<f32> for Sin {
-    fn from(item: f32) -> Self {
-        // if item > 1.0 || item < -1.0 {
-        //     panic!("A Sin type must be between -1.0 and +1.0");
-        // }
-        Self(item)
-    }
-}
-
-impl Neg for Sin {
-    fn neg(self) -> Self {
-        Self(-self.0)
-    }
-    type Output = Self;
 }
 
 impl Mul<Cos> for Sin {
