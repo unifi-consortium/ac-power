@@ -1,3 +1,5 @@
+use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
+use crate::trig::{cos_sin, Theta};
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 // Unbalanced reference frames
@@ -82,6 +84,18 @@ impl Abc {
         b: 0.0,
         c: 0.0,
     };
+
+    pub fn from_polar(amplitude: f32, theta: Theta) -> Self {
+        let (cos, sin) = cos_sin(theta);
+        let sin_m = -cos * SQRT_3_OVER_2 - sin * ONE_HALF;
+        let sin_p = cos * SQRT_3_OVER_2 - sin * ONE_HALF;
+
+        let a = amplitude * sin;
+        let b = amplitude * sin_m;
+        let c = amplitude * sin_p;
+
+        Self { a, b, c }
+    }
 }
 
 #[cfg(test)]

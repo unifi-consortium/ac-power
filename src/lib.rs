@@ -50,7 +50,7 @@ assert_abs_diff_eq!(f32::from(pf), 0.707, epsilon = 0.0001);
 
 Many inverter control systems that implement advanced grid controls or grid forming controls also rely on the transforms implemented in this crate.  Use of this crate can not only make the application code much more readible, it can improve performance and elinate bugs due to the extensive optimization and verification of this crate.
 
-Bellow is a example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
+Bellow is an example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
 
 ```rust
 use ac_power::reference_frames::{Abc, AlphaBeta, Dq};

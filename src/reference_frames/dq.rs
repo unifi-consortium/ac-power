@@ -100,3 +100,11 @@ impl Dq {
         Dq { d, q }
     }
 }
+
+impl Dq0 {
+    pub const ZERO: Dq0 = Dq0 {
+        d: 0.0,
+        q: 0.0,
+        zero: 0.0,
+    };
+}
