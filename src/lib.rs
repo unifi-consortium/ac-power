@@ -19,6 +19,7 @@
 
 pub mod constants;
 pub mod newtypes;
+pub mod number;
 mod ops;
 pub mod reference_frames;
 mod transforms;

@@ -1,15 +1,15 @@
 use crate::constants::{ONE_HALF, ONE_THIRD, SQRT_3_OVER_2, SQRT_3_OVER_3, TWO_THIRDS};
+use crate::number::Num;
 use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
 use crate::trig::{shift_left_120, shift_right_120, Cos, Sin};
-use core::ops::{Add, Mul, Neg, Sub};
 
-impl<T: Mul<f32, Output = T> + Mul<Sin, Output = T> + Copy + From<f32>> From<Polar<T>> for Abc<T> {
+impl<T: Num> From<Polar<T>> for Abc<T> {
     fn from(polar: Polar<T>) -> Self {
         Self::from_polar(polar.amplitude, polar.theta)
     }
 }
 
-impl<T: Mul<f32, Output = T> + Sub<Output = T> + Copy> From<Abc<T>> for AlphaBeta<T> {
+impl<T: Num> From<Abc<T>> for AlphaBeta<T> {
     fn from(abc: Abc<T>) -> Self {
         let alpha = (abc.a * TWO_THIRDS) - (abc.b * ONE_THIRD) - (abc.c * ONE_THIRD);
         let beta = (abc.b * SQRT_3_OVER_3) - (abc.c * SQRT_3_OVER_3);
@@ -18,9 +18,7 @@ impl<T: Mul<f32, Output = T> + Sub<Output = T> + Copy> From<Abc<T>> for AlphaBet
     }
 }
 
-impl<T: Mul<f32, Output = T> + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + Copy>
-    From<AlphaBeta<T>> for Abc<T>
-{
+impl<T: Num> From<AlphaBeta<T>> for Abc<T> {
     fn from(alpha_beta: AlphaBeta<T>) -> Self {
         let a = alpha_beta.alpha;
         let b = -(alpha_beta.alpha * ONE_HALF) + alpha_beta.beta * SQRT_3_OVER_2;
@@ -29,9 +27,7 @@ impl<T: Mul<f32, Output = T> + Add<Output = T> + Sub<Output = T> + Neg<Output = 
     }
 }
 
-impl<T: Mul<f32, Output = T> + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + Copy>
-    From<Abc<T>> for AlphaBeta0<T>
-{
+impl<T: Num> From<Abc<T>> for AlphaBeta0<T> {
     fn from(abc: Abc<T>) -> Self {
         let alpha = (abc.a * TWO_THIRDS) - (abc.b * ONE_THIRD) - (abc.c * ONE_THIRD);
         let beta = (abc.b * SQRT_3_OVER_3) - (abc.c * SQRT_3_OVER_3);
@@ -41,7 +37,7 @@ impl<T: Mul<f32, Output = T> + Add<Output = T> + Sub<Output = T> + Neg<Output = 
     }
 }
 
-impl<T: From<f32>> From<AlphaBeta<T>> for AlphaBeta0<T> {
+impl<T: Num> From<AlphaBeta<T>> for AlphaBeta0<T> {
     fn from(alpha_beta: AlphaBeta<T>) -> Self {
         Self {
             alpha: alpha_beta.alpha,
@@ -60,9 +56,7 @@ impl<T> From<AlphaBeta0<T>> for AlphaBeta<T> {
     }
 }
 
-impl<T: Mul<f32, Output = T> + Add<Output = T> + Sub<Output = T> + Neg<Output = T> + Copy>
-    From<AlphaBeta0<T>> for Abc<T>
-{
+impl<T: Num> From<AlphaBeta0<T>> for Abc<T> {
     fn from(alpha_beta_0: AlphaBeta0<T>) -> Self {
         let a = alpha_beta_0.alpha + alpha_beta_0.zero;
         let b =
@@ -73,16 +67,7 @@ impl<T: Mul<f32, Output = T> + Add<Output = T> + Sub<Output = T> + Neg<Output = 
     }
 }
 
-impl<
-        T: Mul<Sin, Output = T>
-            + Mul<Cos, Output = T>
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Neg<Output = T>
-            + From<f32>
-            + Copy,
-    > AlphaBeta<T>
-{
+impl<T: Num> AlphaBeta<T> {
     pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0<T> {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
@@ -102,16 +87,7 @@ impl<
     }
 }
 
-impl<
-        T: Mul<Sin, Output = T>
-            + Mul<Cos, Output = T>
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Neg<Output = T>
-            + From<f32>
-            + Copy,
-    > AlphaBeta0<T>
-{
+impl<T: Num> AlphaBeta0<T> {
     pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0<T> {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
@@ -131,17 +107,7 @@ impl<
     }
 }
 
-impl<
-        T: Mul<Sin, Output = T>
-            + Mul<Cos, Output = T>
-            + Mul<f32, Output = T>
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Neg<Output = T>
-            + From<f32>
-            + Copy,
-    > Abc<T>
-{
+impl<T: Num> Abc<T> {
     pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq<T> {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
@@ -165,7 +131,7 @@ impl<
     }
 }
 
-impl<T: Add<Output = T> + Mul<f32, Output = T>> From<Abc<T>> for f32
+impl<T: Num> From<Abc<T>> for f32
 where
     f32: From<T>,
 {
@@ -174,7 +140,7 @@ where
     }
 }
 
-impl<T: From<f32>> From<Dq<T>> for Dq0<T> {
+impl<T: Num> From<Dq<T>> for Dq0<T> {
     fn from(dq: Dq<T>) -> Self {
         Self {
             d: dq.d,
@@ -190,17 +156,7 @@ impl<T> From<Dq0<T>> for Dq<T> {
     }
 }
 
-impl<
-        T: Mul<Sin, Output = T>
-            + Mul<Cos, Output = T>
-            + Mul<f32, Output = T>
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Neg<Output = T>
-            + From<f32>
-            + Copy,
-    > Dq<T>
-{
+impl<T: Num> Dq<T> {
     pub fn to_abc(&self, cos: Cos, sin: Sin) -> Abc<T> {
         /* sin and cos with 120 degree offsets */
         let (cos_m, sin_m) = shift_left_120(cos, sin);
@@ -232,17 +188,7 @@ impl<
     }
 }
 
-impl<
-        T: Mul<Sin, Output = T>
-            + Mul<Cos, Output = T>
-            + Mul<f32, Output = T>
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Neg<Output = T>
-            + From<f32>
-            + Copy,
-    > Dq0<T>
-{
+impl<T: Num> Dq0<T> {
     pub fn to_abc(&self, cos: Cos, sin: Sin) -> Abc<T> {
         Dq {
             d: self.d,
@@ -329,7 +275,7 @@ mod tests {
 
     #[test]
     fn dq0_to_abc() {
-        let dq0 = Dq0 {
+        let dq0: Dq0<f32> = Dq0 {
             d: 1.0,
             q: 2.0,
             zero: 3.0,
