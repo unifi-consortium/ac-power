@@ -3,14 +3,6 @@ use crate::trig::{Cos, Sin};
 use core::ops::{Add, Mul, Neg, Sub};
 
 /* Generic type with a trait bound for acceptable number types for use with reference frame structures */
-// pub trait Num<Rhs = Self, Output = Self>: Add<Rhs, Output = Output>
-//                                         + Sub<Rhs, Output = Output>
-//                                         + Mul<f32, Output = Output>
-//                                         + Div<Rhs, Output = Output>
-//                                         + Rem<Rhs, Output = Output>
-//                                         + Neg<Output = Output>
-//                                         + From<f32>
-//                                         + Copy
 pub trait Num:
     Add<Output = Self>
     + Sub<Output = Self>

@@ -1,25 +1,26 @@
+use crate::number::Num;
 use crate::reference_frames::{Abc, Dq};
 use crate::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
 
-pub struct Waveform<const N: usize> {
-    pub positive: [Dq; N],
-    pub negative: [Dq; N],
-    pub zero: Dq,
+pub struct Waveform<const N: usize, T> {
+    pub positive: [Dq<T>; N],
+    pub negative: [Dq<T>; N],
+    pub zero: Dq<T>,
 }
 
-impl<const N: usize> Waveform<N> {
+impl<const N: usize, T: Num> Waveform<N, T> {
     pub fn new() -> Self {
         Self {
-            positive: [Dq::ZERO; N],
-            negative: [Dq::ZERO; N],
-            zero: Dq::ZERO,
+            positive: [Dq::zero(); N],
+            negative: [Dq::zero(); N],
+            zero: Dq::zero(),
         }
     }
 
-    pub fn calculate(&self, theta: Theta) -> Abc {
+    pub fn calculate(&self, theta: Theta) -> Abc<T> {
         let (cos, sin) = cos_sin(theta);
 
-        let mut abc = Abc::ZERO + self.zero.d * sin + self.zero.q * cos;
+        let mut abc = Abc::zero() + self.zero.d * sin + self.zero.q * cos;
 
         // add the harmonics
         let (mut cosn1, mut sinn1) = (Cos::from(1.0), Sin::from(0.0));
