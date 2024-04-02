@@ -1,28 +1,32 @@
 // Balanced reference frames
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct AlphaBeta {
-    pub alpha: f32,
-    pub beta: f32,
+pub struct AlphaBeta<T> {
+    pub alpha: T,
+    pub beta: T,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct AlphaBeta0 {
-    pub alpha: f32,
-    pub beta: f32,
-    pub zero: f32,
+pub struct AlphaBeta0<T> {
+    pub alpha: T,
+    pub beta: T,
+    pub zero: T,
 }
 
-impl AlphaBeta {
-    pub const ZERO: AlphaBeta = AlphaBeta {
-        alpha: 0.0,
-        beta: 0.0,
-    };
+impl<T: From<f32>> AlphaBeta<T> {
+    pub fn zero() -> Self {
+        Self {
+            alpha: 0.0.into(),
+            beta: 0.0.into(),
+        }
+    }
 }
 
-impl AlphaBeta0 {
-    pub const ZERO: AlphaBeta0 = AlphaBeta0 {
-        alpha: 0.0,
-        beta: 0.0,
-        zero: 0.0,
-    };
+impl<T: From<f32>> AlphaBeta0<T> {
+    pub fn zero() -> Self {
+        Self {
+            alpha: 0.0.into(),
+            beta: 0.0.into(),
+            zero: 0.0.into(),
+        }
+    }
 }

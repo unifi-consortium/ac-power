@@ -1,91 +1,77 @@
 use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
-use crate::trig::{cos_sin, Theta};
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use crate::trig::{cos_sin, Sin, Theta};
+use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
 // Unbalanced reference frames
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Abc {
-    pub a: f32,
-    pub b: f32,
-    pub c: f32,
+pub struct Abc<T> {
+    pub a: T,
+    pub b: T,
+    pub c: T,
 }
 
-impl AddAssign<Abc> for Abc {
-    fn add_assign(&mut self, rhs: Abc) {
+impl<T: Add<Output = T> + Copy> AddAssign<Abc<T>> for Abc<T> {
+    fn add_assign(&mut self, rhs: Abc<T>) {
         *self = *self + rhs;
     }
 }
 
-impl SubAssign<Abc> for Abc {
-    fn sub_assign(&mut self, rhs: Abc) {
+impl<T: Sub<Output = T> + Copy> SubAssign<Abc<T>> for Abc<T> {
+    fn sub_assign(&mut self, rhs: Abc<T>) {
         *self = *self - rhs;
     }
 }
 
-impl Add<Abc> for Abc {
-    fn add(self, other: Abc) -> Abc {
+impl<T: Add<Output = T>> Add<Abc<T>> for Abc<T> {
+    fn add(self, other: Abc<T>) -> Abc<T> {
         let a = self.a + other.a;
         let b = self.b + other.b;
         let c = self.c + other.c;
         Self { a, b, c }
     }
-    type Output = Abc;
+    type Output = Abc<T>;
 }
 
-impl Add<f32> for Abc {
-    fn add(self, other: f32) -> Abc {
+impl<T: Add<Output = T> + Copy> Add<T> for Abc<T> {
+    fn add(self, other: T) -> Abc<T> {
         let a = self.a + other;
         let b = self.b + other;
         let c = self.c + other;
         Self { a, b, c }
     }
-    type Output = Abc;
+    type Output = Abc<T>;
 }
 
-impl Add<Abc> for f32 {
-    type Output = Abc;
-
-    fn add(self, rhs: Abc) -> Abc {
-        rhs + self
-    }
-}
-
-impl Sub<Abc> for Abc {
-    fn sub(self, other: Abc) -> Abc {
+impl<T: Sub<Output = T>> Sub<Abc<T>> for Abc<T> {
+    fn sub(self, other: Abc<T>) -> Abc<T> {
         let a = self.a - other.a;
         let b = self.b - other.b;
         let c = self.c - other.c;
         Self { a, b, c }
     }
-    type Output = Abc;
+    type Output = Abc<T>;
 }
 
-impl Sub<f32> for Abc {
-    fn sub(self, other: f32) -> Abc {
+impl<T: Sub<Output = T> + Copy> Sub<T> for Abc<T> {
+    fn sub(self, other: T) -> Abc<T> {
         let a = self.a - other;
         let b = self.b - other;
         let c = self.c - other;
         Self { a, b, c }
     }
-    type Output = Abc;
+    type Output = Abc<T>;
 }
 
-impl Sub<Abc> for f32 {
-    type Output = Abc;
-
-    fn sub(self, rhs: Abc) -> Abc {
-        rhs - self
+impl<T: Mul<f32, Output = T> + Mul<Sin, Output = T> + Copy + From<f32>> Abc<T> {
+    pub fn zero() -> Self {
+        Self {
+            a: 0.0.into(),
+            b: 0.0.into(),
+            c: 0.0.into(),
+        }
     }
-}
 
-impl Abc {
-    pub const ZERO: Abc = Abc {
-        a: 0.0,
-        b: 0.0,
-        c: 0.0,
-    };
-
-    pub fn from_polar(amplitude: f32, theta: Theta) -> Self {
+    pub fn from_polar(amplitude: T, theta: Theta) -> Self {
         let (cos, sin) = cos_sin(theta);
         let sin_m = -cos * SQRT_3_OVER_2 - sin * ONE_HALF;
         let sin_p = cos * SQRT_3_OVER_2 - sin * ONE_HALF;

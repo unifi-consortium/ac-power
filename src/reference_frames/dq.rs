@@ -1,110 +1,125 @@
 use crate::trig::rotate;
 use crate::trig::{Cos, Sin};
-use core::ops::{Add, Sub};
+use core::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Dq {
-    pub d: f32,
-    pub q: f32,
+pub struct Dq<T> {
+    pub d: T,
+    pub q: T,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Dq0 {
-    pub d: f32,
-    pub q: f32,
-    pub zero: f32,
+pub struct Dq0<T> {
+    pub d: T,
+    pub q: T,
+    pub zero: T,
 }
 
-impl Add<Dq> for Dq {
-    fn add(self, other: Dq) -> Dq {
+impl<T: Add<Output = T>> Add<Dq<T>> for Dq<T> {
+    fn add(self, other: Dq<T>) -> Dq<T> {
         let d = self.d + other.d;
         let q = self.q + other.q;
         Dq { d, q }
     }
-    type Output = Dq;
+    type Output = Dq<T>;
 }
 
-impl Add<Dq0> for Dq {
-    fn add(self, other: Dq0) -> Dq0 {
+impl<T: Add<Output = T>> Add<Dq0<T>> for Dq<T> {
+    fn add(self, other: Dq0<T>) -> Dq0<T> {
         let d = self.d + other.d;
         let q = self.q + other.q;
         let zero = other.zero;
         Dq0 { d, q, zero }
     }
-    type Output = Dq0;
+    type Output = Dq0<T>;
 }
 
-impl Add<Dq0> for Dq0 {
-    fn add(self, other: Dq0) -> Dq0 {
+impl<T: Add<Output = T>> Add<Dq0<T>> for Dq0<T> {
+    fn add(self, other: Dq0<T>) -> Dq0<T> {
         let d = self.d + other.d;
         let q = self.q + other.q;
         let zero = self.zero + other.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0;
+    type Output = Dq0<T>;
 }
 
-impl Add<Dq> for Dq0 {
-    fn add(self, other: Dq) -> Dq0 {
+impl<T: Add<Output = T>> Add<Dq<T>> for Dq0<T> {
+    fn add(self, other: Dq<T>) -> Dq0<T> {
         let d = self.d + other.d;
         let q = self.q + other.q;
         let zero = self.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0;
+    type Output = Dq0<T>;
 }
 
-impl Sub<Dq> for Dq {
-    fn sub(self, other: Dq) -> Dq {
+impl<T: Sub<Output = T>> Sub<Dq<T>> for Dq<T> {
+    fn sub(self, other: Dq<T>) -> Dq<T> {
         let d = self.d - other.d;
         let q = self.q - other.q;
         Self { d, q }
     }
-    type Output = Dq;
+    type Output = Dq<T>;
 }
 
-impl Sub<Dq0> for Dq {
-    fn sub(self, other: Dq0) -> Dq0 {
+impl<T: Sub<Output = T> + Neg<Output = T>> Sub<Dq0<T>> for Dq<T> {
+    fn sub(self, other: Dq0<T>) -> Dq0<T> {
         let d = self.d - other.d;
         let q = self.q - other.q;
         let zero = -other.zero;
         Dq0 { d, q, zero }
     }
-    type Output = Dq0;
+    type Output = Dq0<T>;
 }
 
-impl Sub<Dq0> for Dq0 {
-    fn sub(self, other: Dq0) -> Dq0 {
+impl<T: Sub<Output = T>> Sub<Dq0<T>> for Dq0<T> {
+    fn sub(self, other: Dq0<T>) -> Dq0<T> {
         let d = self.d - other.d;
         let q = self.q - other.q;
         let zero = self.zero - other.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0;
+    type Output = Dq0<T>;
 }
 
-impl Sub<Dq> for Dq0 {
-    fn sub(self, other: Dq) -> Dq0 {
+impl<T: Sub<Output = T>> Sub<Dq<T>> for Dq0<T> {
+    fn sub(self, other: Dq<T>) -> Dq0<T> {
         let d = self.d - other.d;
         let q = self.q - other.q;
         let zero = self.zero;
         Self { d, q, zero }
     }
-    type Output = Dq0;
+    type Output = Dq0<T>;
 }
 
-impl Dq {
-    pub const ZERO: Dq = Dq { d: 0.0, q: 0.0 };
-    pub fn rotate(&self, cos: Cos, sin: Sin) -> Dq {
+impl<
+        T: Mul<Sin, Output = T>
+            + Mul<Cos, Output = T>
+            + Sub<Output = T>
+            + Add<Output = T>
+            + Copy
+            + From<f32>,
+    > Dq<T>
+{
+    pub fn zero() -> Self {
+        Self {
+            d: 0.0.into(),
+            q: 0.0.into(),
+        }
+    }
+    pub fn rotate(&self, cos: Cos, sin: Sin) -> Dq<T> {
         let (d, q) = rotate(self.d, self.q, cos, sin);
         Dq { d, q }
     }
 }
 
-impl Dq0 {
-    pub const ZERO: Dq0 = Dq0 {
-        d: 0.0,
-        q: 0.0,
-        zero: 0.0,
-    };
+impl<T: From<f32>> Dq0<T> {
+    pub fn zero() -> Self {
+        Self {
+            d: 0.0.into(),
+            q: 0.0.into(),
+            zero: 0.0.into(),
+        }
+    }
 }

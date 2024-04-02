@@ -45,15 +45,16 @@ let sin = Sin::from(0.6);
 let sin_as_float: f32 = sin.into();
 ```
 
-`Sin` and `Cos` types support arithmetic operations which always return f32.
+`Sin` and `Cos` types support multiplication to other numeric types, always returning the other type.
 
 ```rust
 use ac_power::trig::Sin;
+use ac_power::newtypes::Voltage;
 use approx::assert_abs_diff_eq;
 
 let sin = Sin::from_degrees(45.0);
-let x = 1.0 * sin;
-assert_abs_diff_eq!(x, 0.707, epsilon = 0.0001);
+let v: Voltage = Voltage::from(1.0) * sin;
+assert_abs_diff_eq!(f32::from(v), 0.707, epsilon = 0.0001);
 ```
 
 The `Theta` data-type supports a wrapping add assign.
@@ -80,6 +81,7 @@ The trig modules contains 4 functions which are useful for ac power processing
 */
 
 mod types;
+use core::ops::{Add, Mul, Sub};
 pub use types::{Cos, Sin, Theta};
 
 use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
@@ -116,7 +118,14 @@ pub fn cos_sin(theta: Theta) -> (Cos, Sin) {
 /// let (cos, sin) = cos_sin(theta);
 /// let (xr, yr) = rotate(x, y, cos, sin);
 /// ```
-pub fn rotate(x: f32, y: f32, cos: Cos, sin: Sin) -> (f32, f32) {
+pub fn rotate<
+    T: Copy + Mul<Sin, Output = T> + Mul<Cos, Output = T> + Sub<Output = T> + Add<Output = T>,
+>(
+    x: T,
+    y: T,
+    cos: Cos,
+    sin: Sin,
+) -> (T, T) {
     let xr = x * cos - y * sin;
     let yr = x * sin + y * cos;
 
@@ -137,8 +146,8 @@ pub fn rotate(x: f32, y: f32, cos: Cos, sin: Sin) -> (f32, f32) {
 /// ```
 pub fn shift_right_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
     let (cosr, sinr) = rotate(
-        cos.into(),
-        sin.into(),
+        f32::from(cos),
+        f32::from(sin),
         (-ONE_HALF).into(),
         SQRT_3_OVER_2.into(),
     );
@@ -159,8 +168,8 @@ pub fn shift_right_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
 /// ```
 pub fn shift_left_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
     let (cosr, sinr) = rotate(
-        cos.into(),
-        sin.into(),
+        f32::from(cos),
+        f32::from(sin),
         (-ONE_HALF).into(),
         (-SQRT_3_OVER_2).into(),
     );
@@ -182,8 +191,8 @@ pub fn shift_left_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
 /// let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
 /// ```
 pub fn chebyshev(cos: Cos, sin1: Sin, cos1: Cos, sin2: Sin, cos2: Cos) -> (Cos, Sin) {
-    let cosn = 2.0 * (cos * cos1) - cos2;
-    let sinn = 2.0 * (cos * sin1) - sin2;
+    let cosn = 2.0 * (cos * cos1) - f32::from(cos2);
+    let sinn = 2.0 * (cos * sin1) - f32::from(sin2);
     (cosn.into(), sinn.into())
 }
 

@@ -1,10 +1,10 @@
-use crate::impl_ops;
+use crate::impl_f32_ops;
 use crate::trig::cos_sin;
 use crate::trig::Cos;
 use crate::trig::Theta;
 use core::convert::From;
 
-use core::ops::{Mul, MulAssign, Neg, Sub};
+use core::ops::{Mul, MulAssign, Neg};
 // use core::panic;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -56,7 +56,14 @@ impl Sin {
 }
 
 // use macro to support most of the arithmetic
-impl_ops!(Sin, f32);
+impl_f32_ops!(Sin);
+
+impl Neg for Sin {
+    fn neg(self) -> Self {
+        Self(-self.0)
+    }
+    type Output = Self;
+}
 
 impl From<i32> for Sin {
     fn from(item: i32) -> Self {
