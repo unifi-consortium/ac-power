@@ -1,29 +1,63 @@
 ![continuous integration](https://github.com/unifi-consortium/ac-power/actions/workflows/rust.yml/badge.svg)
 
-# ac-power
+# `ac-power`
+
 Reference frames, transforms, and trig tools for digital signal processing of AC power signals.
-
-`ac-power` is a crate for creating and manipulating [ac power](https://en.wikipedia.org/wiki/AC_power) signals in commonly used reference frames for conducting ac power analysis and signal processing.  The crate is designed for `#![no_std]` so can be used in microcontrollers for devices such as inverters and power meters which need to process ac power signals.  While the library is floating-point, it uses the heavily optimized fixed-point trig from [idsp](https://crates.io/crates/idsp) for efficient execution in constrained environments such as microcontrollers.
-
-![image](https://github.com/enphase/ac-power/assets/93219693/a44adb3a-eba3-4682-a412-0e61c4dabcc4)
 
 # How to use
 
-A very simple use case for this crate would be to calculate real and reactive powers from three-phase voltage and current data
+At the core of the library are data structs which represent three-phase AC phasors in different reference frames.  The struct have transforms to support conversions between different reference frames.
+
+```rust
+use ac_power::reference_frames::{Abc, AlphaBeta0};
+
+// create a phasor in Abc reference frame
+let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
+
+// convert to alpha-beta
+let alpha_beta_zero = AlphaBeta0::from(abc);
+```
+
+The library also include [trigometric functions](crate::trig), which are useful when converter between stationary and roatating reference frames.
+
+```rust
+use ac_power::reference_frames::{Abc, Dq0};
+use ac_power::trig::{Theta, cos_sin};
+
+// create a phasor in Abc reference frame
+let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
+
+// convert to Dq0
+let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
+let dq0 = abc.to_dq0(cos, sin);
+```
+
+The reference frames are implemented with generics, so you can use any data-type that implements the necessary numeric traits.  The crate comes with three built-in: `Voltage(f32)`, `Current(f32)`, and `Power(f32)`.
+
+```rust
+use ac_power::newtypes::{Voltage, Current, Power};
+
+let v = Voltage::from(10.0);
+let i = Current::from(1.5);
+let p: Power = v * i;
+```
+
+If you muliply a voltage phasor by current phasor, you get a `Pq` struct returned.  This is a basic use case to calculate real and reactive powers from three-phase voltage and current data.
 
 ```rust
 
-use ac_power::reference_frames::{Abc, Dq0, AlphaBeta0, Polar};
+use ac_power::reference_frames::{Abc, Dq0, AlphaBeta, Polar};
 use ac_power::trig::{Theta, cos_sin};
+use ac_power::newtypes::{Voltage, Current};
 use approx::assert_abs_diff_eq;
 
-// create a voltage and a current that is lagging 45 degrees
-let v_polar = Polar{amplitude: 340.0, theta: Theta::from_degrees(0.0)};
-let i_polar = Polar{amplitude: 8.2, theta: Theta::from_degrees(45.0)};
+// set the magnitude of the voltage and current
+let v_mag = Voltage::from(340.0);
+let i_mag = Current::from(8.2);
 
-// convert to Abc reference
-let v = Abc::from(v_polar);
-let i = Abc::from(i_polar);
+// create voltage and current phasors in the Abc reference frame
+let v = Abc::from_polar(v_mag, Theta::from_degrees(0.0));
+let i = Abc::from_polar(i_mag, Theta::from_degrees(45.0));
 
 // calculate P and Q
 let pq = v * i;
@@ -33,15 +67,25 @@ let pf = pq.power_factor();
 
 // check the power factor
 assert_abs_diff_eq!(f32::from(pf), 0.707, epsilon = 0.0001);
+
+// convert v and i to alpha_beta
+let v_alpha_beta = AlphaBeta::from(v);
+let i_alpha_beta = AlphaBeta::from(i);
+
+// verify the power factor is still correct
+let pf = (v_alpha_beta * i_alpha_beta).power_factor();
+assert_abs_diff_eq!(f32::from(pf), 0.707, epsilon = 0.0001);
+
 ```
 
 Many inverter control systems that implement advanced grid controls or grid forming controls also rely on the transforms implemented in this crate.  Use of this crate can not only make the application code much more readible, it can improve performance and elinate bugs due to the extensive optimization and verification of this crate.
 
-Bellow is a example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
+Bellow is an example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
 
 ```rust
 use ac_power::reference_frames::{Abc, AlphaBeta, Dq};
 use ac_power::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
+use ac_power::newtypes::Voltage;
 use idsp::iir::{Action, Biquad, Pid};
 
 pub struct Pll {
@@ -58,8 +102,8 @@ pub struct Pll {
     pub f: f32,
 
     // rotating reference frames
-    pub dq_pos: Dq,
-    pub dq_neg: Dq,
+    pub dq_pos: Dq<Voltage>,
+    pub dq_neg: Dq<Voltage>,
 
     // theta integration contant
     k_theta: f32,
@@ -89,13 +133,13 @@ impl Pll {
             sin: 0.0.into(),
             cos: 1.0.into(),
             f: fref,
-            dq_pos: Dq::ZERO,
-            dq_neg: Dq::ZERO,
+            dq_pos: Dq::zero(),
+            dq_neg: Dq::zero(),
             k_theta,
         }
     }
 
-    pub fn update(&mut self, abc: Abc) {
+    pub fn update(&mut self, abc: Abc<Voltage>) {
         // clarke transform
         let alpha_beta = AlphaBeta::from(abc);
 
@@ -104,7 +148,7 @@ impl Pll {
         self.dq_neg = alpha_beta.to_dq(self.cos, -self.sin);
 
         // PI loop filter
-        self.f = self.fref + self.filter.update(&mut self.filter_state, self.dq_pos.q);
+        self.f = self.fref + self.filter.update(&mut self.filter_state, self.dq_pos.q.into());
 
         // update the phase info
         self.theta += (self.f * self.k_theta) as i32;
@@ -130,4 +174,30 @@ And three reference frames for unbalanced representations (supports a zero seque
 # Transforms
 
 The crate supports for following lossless conversions (zero sequence retained):
+
+| From                                                  | To                                                   |
+| :---------------------------------------------------- |:----------------------------------------------------:|
+| [Abc](crate::reference_frames::Abc)                   | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
+| [Abc](crate::reference_frames::Abc)                   | [Dq0](crate::reference_frames::Dq0)                  |
+| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [Abc](crate::reference_frames::Abc)                  |
+| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [Dq0](crate::reference_frames::Dq0)                  |
+| [Dq0](crate::reference_frames::Dq0)                   | [Abc](crate::reference_frames::Abc)                  |
+| [Dq0](crate::reference_frames::Dq0)                   | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
+| [AlphaBeta](crate::reference_frames::Dq0)             | [Abc](crate::reference_frames::Abc)                  |
+| [AlphaBeta](crate::reference_frames::Dq0)             | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
+| [AlphaBeta](crate::reference_frames::Dq0)             | [Dq0](crate::reference_frames::Dq0)                  |
+| [Dq](crate::reference_frames::Dq0)                    | [Abc](crate::reference_frames::Abc)                  |
+| [Dq](crate::reference_frames::Dq0)                    | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
+| [Dq](crate::reference_frames::Dq0)                    | [Dq0](crate::reference_frames::Dq0)                  |
+
+The crate supports the following lossy conversions (zero sequence lost):
+
+| From                                                  | To                                                 |
+| :---------------------------------------------------- |:--------------------------------------------------:|
+| [Abc](crate::reference_frames::Abc)                   | [AlphaBeta](crate::reference_frames::AlphaBeta)    |
+| [Abc](crate::reference_frames::Abc)                   | [Dq](crate::reference_frames::Dq)                  |
+| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [AlphaBeta](crate::reference_frames::AlphaBeta)    |
+| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [Dq](crate::reference_frames::Dq)                  |
+| [Dq0](crate::reference_frames::Dq0)                   | [AlphaBeta](crate::reference_frames::AlphaBeta)    |
+| [Dq0](crate::reference_frames::Dq0)                   | [Dq](crate::reference_frames::Dq)                  |
 

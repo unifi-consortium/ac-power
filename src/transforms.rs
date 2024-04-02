@@ -158,8 +158,8 @@ impl<
         let (cos_m, sin_m) = shift_left_120(cos, sin);
         let (cos_p, sin_p) = shift_right_120(cos, sin);
 
-        let d = ((self.a * sin) + (self.b * sin_m) + (self.b * sin_p)) * TWO_THIRDS;
-        let q = ((self.a * cos) + (self.b * cos_m) + (self.b * cos_p)) * TWO_THIRDS;
+        let d = ((self.a * sin) + (self.b * sin_m) + (self.c * sin_p)) * TWO_THIRDS;
+        let q = ((self.a * cos) + (self.b * cos_m) + (self.c * cos_p)) * TWO_THIRDS;
         let zero = (self.a + self.b + self.c) * ONE_THIRD;
         Dq0 { d, q, zero }
     }
@@ -277,58 +277,128 @@ mod tests {
     use super::*;
     use crate::trig::cos_sin;
     use crate::trig::Theta;
+    use approx::assert_abs_diff_eq;
 
     #[test]
     fn abc_to_alpha_beta_0() {
-        let abc = Abc::<f32>::zero();
-        let _alpha_beta_0 = AlphaBeta0::from(abc);
+        let abc = Abc {
+            a: 1.0,
+            b: 2.0,
+            c: 3.0,
+        };
+        let alpha_beta_0 = AlphaBeta0::from(abc);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(alpha_beta_0.alpha, -1.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(alpha_beta_0.beta, -0.577350, epsilon = 0.0001);
+        assert_abs_diff_eq!(alpha_beta_0.zero, 2.0, epsilon = 0.0001);
     }
 
     #[test]
     fn abc_to_dq0() {
-        let abc = Abc::<f32>::zero();
+        let abc = Abc {
+            a: 1.0,
+            b: 2.0,
+            c: 3.0,
+        };
+
         let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
-        let _dq0 = abc.to_dq0(cos, sin);
+        let dq0 = abc.to_dq0(cos, sin);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(dq0.d, -1.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq0.q, -0.577350, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq0.zero, 2.0, epsilon = 0.0001);
     }
 
     #[test]
     fn alpha_beta_0_to_dq0() {
-        let alpha_beta_0 = AlphaBeta0::<f32>::zero();
-        let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
-        let _dq0 = alpha_beta_0.to_dq0(cos, sin);
+        let alpha_beta_0 = AlphaBeta0 {
+            alpha: 1.0,
+            beta: 2.0,
+            zero: 3.0,
+        };
+        let (cos, sin) = cos_sin(Theta::from_degrees(45.0));
+        let dq0 = alpha_beta_0.to_dq0(cos, sin);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(dq0.d, -0.7071067, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq0.q, 2.1213203435, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq0.zero, 3.0, epsilon = 0.0001);
     }
 
     #[test]
     fn dq0_to_abc() {
-        let dq0 = Dq0::<f32>::zero();
-        let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
-        let _abc = dq0.to_abc(cos, sin);
+        let dq0 = Dq0 {
+            d: 1.0,
+            q: 2.0,
+            zero: 3.0,
+        };
+        let (cos, sin) = cos_sin(Theta::from_degrees(45.0));
+        let abc = dq0.to_abc(cos, sin);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(abc.a, 5.12132034, epsilon = 0.0001);
+        assert_abs_diff_eq!(abc.b, 2.551712263, epsilon = 0.0001);
+        assert_abs_diff_eq!(abc.c, 1.326967392, epsilon = 0.0001);
     }
 
     #[test]
     fn dq0_to_alpha_beta_0() {
-        let dq0 = Dq0::<f32>::zero();
-        let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
-        let _abc = dq0.to_alpha_beta_0(cos, sin);
+        let dq0 = Dq0 {
+            d: -0.7071067,
+            q: 2.1213203435,
+            zero: 3.0,
+        };
+        let (cos, sin) = cos_sin(Theta::from_degrees(45.0));
+        let alpha_beta_0 = dq0.to_alpha_beta_0(cos, sin);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(alpha_beta_0.alpha, 1.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(alpha_beta_0.beta, 2.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(alpha_beta_0.zero, 3.0, epsilon = 0.0001);
     }
 
     #[test]
     fn alpha_beta_to_abc() {
-        let alpha_beta = AlphaBeta::<f32>::zero();
-        let _abc = Abc::from(alpha_beta);
+        let alpha_beta = AlphaBeta {
+            alpha: 1.0,
+            beta: 2.0,
+        };
+        let abc = Abc::from(alpha_beta);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(abc.a, 1.0, epsilon = 0.0001);
+        assert_abs_diff_eq!(abc.b, 1.2320508, epsilon = 0.0001);
+        assert_abs_diff_eq!(abc.c, -2.232050, epsilon = 0.0001);
     }
 
     #[test]
     fn alpha_beta_to_alpha_beta_0() {
-        let alpha_beta = AlphaBeta::<f32>::zero();
-        let _alpha_beta0 = AlphaBeta0::<f32>::from(alpha_beta);
+        let alpha_beta = AlphaBeta {
+            alpha: 1.0,
+            beta: 2.0,
+        };
+        let alpha_beta0 = AlphaBeta0::<f32>::from(alpha_beta);
+
+        assert_abs_diff_eq!(alpha_beta0.alpha, alpha_beta.alpha, epsilon = 0.0001);
+        assert_abs_diff_eq!(alpha_beta0.beta, alpha_beta.beta, epsilon = 0.0001);
+        assert_abs_diff_eq!(alpha_beta0.zero, 0.0, epsilon = 0.0001);
     }
 
     #[test]
     fn alpha_beta_to_dq0() {
-        let alpha_beta = AlphaBeta::<f32>::zero();
-        let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
-        let _dq0 = alpha_beta.to_dq0(cos, sin);
+        let alpha_beta = AlphaBeta {
+            alpha: 1.0,
+            beta: 2.0,
+        };
+        let (cos, sin) = cos_sin(Theta::from_degrees(45.0));
+        let dq0 = alpha_beta.to_dq0(cos, sin);
+
+        // verified against results from https://pypi.org/project/ClarkePark/
+        assert_abs_diff_eq!(dq0.d, -0.7071067, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq0.q, 2.1213203435, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq0.zero, 0.0, epsilon = 0.0001);
     }
 
     #[test]

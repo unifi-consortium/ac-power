@@ -14,6 +14,7 @@ pub struct Current(f32);
 #[derive(Neg, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Power(f32);
 
+// derive the trig multiplications
 impl_trig_ops!(Sin, Voltage);
 impl_trig_ops!(Cos, Voltage);
 impl_trig_ops!(Sin, Current);
