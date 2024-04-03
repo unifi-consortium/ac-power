@@ -3,11 +3,10 @@ use crate::trig::cos_sin;
 use crate::trig::Sin;
 use crate::trig::Theta;
 use core::convert::From;
-
 use core::ops::{Mul, MulAssign, Neg};
-// use core::panic;
+use derive_more::{From, Into};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, From, Into)]
 pub struct Cos(f32);
 
 impl Cos {

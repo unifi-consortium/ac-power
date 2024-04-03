@@ -3,11 +3,10 @@ use crate::trig::cos_sin;
 use crate::trig::Cos;
 use crate::trig::Theta;
 use core::convert::From;
-
 use core::ops::{Mul, MulAssign, Neg};
-// use core::panic;
+use derive_more::{From, Into};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, From, Into)]
 pub struct Sin(f32);
 
 impl Sin {
