@@ -3,7 +3,7 @@ use crate::trig::cos_sin;
 use crate::trig::Cos;
 use crate::trig::Theta;
 use core::convert::From;
-use core::ops::{Mul, MulAssign, Neg};
+use core::ops::{Mul, Neg};
 use derive_more::{From, Into};
 
 #[derive(Debug, Copy, Clone, PartialEq, From, Into)]

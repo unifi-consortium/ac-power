@@ -23,11 +23,5 @@ macro_rules! impl_f32_ops {
             }
             type Output = f32;
         }
-
-        impl MulAssign<$t> for f32 {
-            fn mul_assign(&mut self, other: $t) {
-                *self *= other.0;
-            }
-        }
     };
 }
