@@ -6,7 +6,7 @@ Reference frames, transforms, and trig for embedded processing of AC power signa
 
 # How to use
 
-At the core of the library are data structs which represent three-phase AC phasors in different reference frames.  The struct have transforms to support conversions between different reference frames.
+At the core of the library are data structs which represent three-phase AC phasors in different reference frames.  The structs have transforms to support conversions between different reference frames.
 
 ```rust
 use ac_power::reference_frames::{Abc, AlphaBeta0};
@@ -18,7 +18,7 @@ let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
 let alpha_beta_zero = AlphaBeta0::from(abc);
 ```
 
-The library also include [trigometric functions](crate::trig), which are useful when converter between stationary and roatating reference frames.
+The library also include [trigometric functions](crate::trig), which are useful when converting between stationary and roatating reference frames.
 
 ```rust
 use ac_power::reference_frames::{Abc, Dq0};
@@ -32,13 +32,14 @@ let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
 let dq0 = abc.to_dq0(cos, sin);
 ```
 
-The reference frames are implemented with generics, so you can use any data-type that implements the necessary numeric traits.  The crate comes with three built-in: `Voltage(f32)`, `Current(f32)`, and `Power(f32)`.
+The reference frames are implemented with generics, so you can use any data-type that implements the necessary numeric traits.  The crate comes with four built-in: `Voltage(f32)`, `Current(f32)`, `Power(f32)`, and `Impedance(f32)`.
 
 ```rust
-use ac_power::newtypes::{Voltage, Current, Power};
+use ac_power::newtypes::{Voltage, Current, Power, Impedance};
 
-let v = Voltage::from(10.0);
+let z = Impedance::from(10.0);
 let i = Current::from(1.5);
+let v: Voltage = i * z;
 let p: Power = v * i;
 ```
 
@@ -105,7 +106,7 @@ pub struct Pll {
     pub dq_pos: Dq<Voltage>,
     pub dq_neg: Dq<Voltage>,
 
-    // theta integration contant
+    // theta integration constant
     k_theta: f32,
 }
 

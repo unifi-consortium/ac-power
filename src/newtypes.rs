@@ -17,6 +17,10 @@ pub struct Current(f32);
 #[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Power(f32);
 
+/// A newtype representing an electric impedance (wraps f32)
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
+pub struct Impedance(f32);
+
 // derive the trig multiplications
 impl_trig_ops!(Sin, Voltage);
 impl_trig_ops!(Cos, Voltage);
@@ -24,6 +28,8 @@ impl_trig_ops!(Sin, Current);
 impl_trig_ops!(Cos, Current);
 impl_trig_ops!(Sin, Power);
 impl_trig_ops!(Cos, Power);
+impl_trig_ops!(Sin, Impedance);
+impl_trig_ops!(Cos, Impedance);
 
 impl From<f32> for Voltage {
     fn from(number: f32) -> Voltage {
@@ -58,6 +64,18 @@ impl From<f32> for Power {
 impl From<Power> for f32 {
     fn from(power: Power) -> f32 {
         power.0
+    }
+}
+
+impl From<f32> for Impedance {
+    fn from(number: f32) -> Impedance {
+        Impedance(number)
+    }
+}
+
+impl From<Impedance> for f32 {
+    fn from(impedance: Impedance) -> f32 {
+        impedance.0
     }
 }
 
@@ -103,6 +121,20 @@ impl Mul<Power> for f32 {
     type Output = Power;
 }
 
+impl Mul<f32> for Impedance {
+    fn mul(self, rhs: f32) -> Impedance {
+        Impedance(self.0 * rhs)
+    }
+    type Output = Impedance;
+}
+
+impl Mul<Impedance> for f32 {
+    fn mul(self, rhs: Impedance) -> Impedance {
+        Impedance(self * rhs.0)
+    }
+    type Output = Impedance;
+}
+
 impl Mul<Current> for Voltage {
     fn mul(self, rhs: Current) -> Power {
         Power(self.0 * rhs.0)
@@ -115,4 +147,18 @@ impl Mul<Voltage> for Current {
         Power(self.0 * rhs.0)
     }
     type Output = Power;
+}
+
+impl Mul<Current> for Impedance {
+    fn mul(self, rhs: Current) -> Voltage {
+        Voltage(self.0 * rhs.0)
+    }
+    type Output = Voltage;
+}
+
+impl Mul<Impedance> for Current {
+    fn mul(self, rhs: Impedance) -> Voltage {
+        Voltage(self.0 * rhs.0)
+    }
+    type Output = Voltage;
 }
