@@ -70,13 +70,13 @@ assert_abs_diff_eq!(theta.to_degrees(), -179.0, epsilon = 0.0001);
 
 # Functions
 
-The trig modules contains 4 functions which are useful for ac power processing
+The trig modules contains 5 functions which are useful for ac power processing
 
-1. [cos_sin](crate::trig::cos_sin) - Calculate cos and sin from theta simultaneously.
-2. [rotate](crate::trig::rotate) - Function for rotating a vector using Ptolemy's theorem
-3. [shift_right_120](crate::trig::shift_right_120) - Function for rotating a vector clockwise by 120 degrees
-4. [shift_left_120](crate::trig::shift_left_120) - Function for rotating a vector counter-clockwise by 120 degrees
-5. [chebychev](crate::trig::chebychev) - calculate sin(Nx) and cos(Nx) using chebychev method
+1. [cos_sin] - Calculate cos and sin from theta simultaneously.
+2. [rotate] - Function for rotating a vector using Ptolemy's theorem
+3. [shift_right_120] - Function for rotating a vector clockwise by 120 degrees
+4. [shift_left_120] - Function for rotating a vector counter-clockwise by 120 degrees
+5. [chebyshev] - calculate sin(Nx) and cos(Nx) using chebyshev method
 
 */
 

@@ -3,15 +3,15 @@ use crate::{
     trig::{Cos, Sin},
 };
 use core::ops::{Mul, MulAssign};
-use derive_more::{Add, Neg, Sub};
+use derive_more::{Add, AddAssign, Neg, Sub};
 
-#[derive(Neg, Add, Sub, Debug, Copy, Clone, PartialEq)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Voltage(f32);
 
-#[derive(Neg, Add, Sub, Debug, Copy, Clone, PartialEq)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Current(f32);
 
-#[derive(Neg, Add, Sub, Debug, Copy, Clone, PartialEq)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Power(f32);
 
 // derive the trig multiplications
