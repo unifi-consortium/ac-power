@@ -17,6 +17,22 @@ pub struct Pq {
 }
 
 impl Pq {
+    /// Calculates power factor of a Pq value
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ac_power::reference_frames::Pq;
+    /// use approx::assert_abs_diff_eq;
+    ///
+    /// let pq = Pq {
+    ///     p: 1.0.into(),
+    ///     q: 1.0.into(),
+    /// };
+    ///
+    /// let pf = pq.power_factor();
+    /// assert_abs_diff_eq!(f32::from(pf), 0.707, epsilon = 0.0001);
+    /// ```
     pub fn power_factor(&self) -> Cos {
         // convert p and q into fixed-point format for efficient trig
         let (x, y) = normalize(self.p.into(), self.q.into());

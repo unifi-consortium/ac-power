@@ -2,12 +2,14 @@ use crate::trig::rotate;
 use crate::trig::{Cos, Sin};
 use core::ops::{Add, Mul, Neg, Sub};
 
+/// Balanced rotating reference frame
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Dq<T> {
     pub d: T,
     pub q: T,
 }
 
+/// Unbalanced rotating reference frame
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Dq0<T> {
     pub d: T,

@@ -2,7 +2,7 @@ use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 use crate::trig::{cos_sin, Sin, Theta};
 use core::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
-// Unbalanced reference frames
+/// Basic stationary reference frame (i.e. the instantaneous signals)
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Abc<T> {
     pub a: T,

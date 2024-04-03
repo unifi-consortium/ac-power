@@ -5,12 +5,15 @@ use crate::{
 use core::ops::{Mul, MulAssign};
 use derive_more::{Add, AddAssign, Neg, Sub};
 
+/// A newtype representing an electric voltage (wraps f32)
 #[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Voltage(f32);
 
+/// A newtype representing an electric current (wraps f32)
 #[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Current(f32);
 
+/// A newtype representing an electric power (wraps f32)
 #[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq)]
 pub struct Power(f32);
 

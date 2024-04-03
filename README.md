@@ -2,7 +2,7 @@
 
 # `ac-power`
 
-Reference frames, transforms, and trig tools for digital signal processing of AC power signals.
+Reference frames, transforms, and trig for embedded processing of AC power signals.
 
 # How to use
 
@@ -159,7 +159,7 @@ impl Pll {
 
 # Reference frames
 
-The crate supports 5 difference reference frames.  These include 3 balanced reference frames:
+The crate supports 6 difference reference frames.  These include 3 balanced reference frames:
 
 1.  [Polar](crate::reference_frames::Polar) - Polar representation (aplitude and angle)
 2.  [AlphaBeta](crate::reference_frames::AlphaBeta) - Two axis (alpha and beta) stationary reference frame representation

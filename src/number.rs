@@ -3,7 +3,7 @@ use crate::trig::{Cos, Sin};
 use core::fmt::Debug;
 use core::ops::{Add, AddAssign, Mul, Neg, Sub};
 
-/* Generic type with a trait bound for acceptable number types for use with reference frame structures */
+/// Generic type with a trait bound for acceptable number types for use with reference frame structures
 pub trait Num:
     Add<Output = Self>
     + AddAssign<Self>
