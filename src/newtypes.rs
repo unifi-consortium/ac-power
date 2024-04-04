@@ -1,5 +1,6 @@
 use crate::trig::{Cos, Sin};
 use core::ops::{Mul, MulAssign};
+use core::primitive::f32;
 use derive_more::{Add, AddAssign, From, Into, Neg, Sub};
 
 macro_rules! impl_trig_ops {

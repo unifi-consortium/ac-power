@@ -1,4 +1,3 @@
-use crate::impl_f32_ops;
 use crate::trig::cos_sin;
 use crate::trig::Sin;
 use crate::trig::Theta;
@@ -53,9 +52,6 @@ impl Cos {
         Self::from_theta(theta)
     }
 }
-
-// use macro to support most of the arithmetic
-impl_f32_ops!(Cos);
 
 impl Neg for Cos {
     fn neg(self) -> Self {
