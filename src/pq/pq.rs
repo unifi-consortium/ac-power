@@ -22,7 +22,7 @@ impl Pq {
     /// # Examples
     ///
     /// ```
-    /// use ac_power::reference_frames::Pq;
+    /// use ac_power::Pq;
     /// use approx::assert_abs_diff_eq;
     ///
     /// let pq = Pq {

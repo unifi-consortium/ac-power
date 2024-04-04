@@ -9,7 +9,7 @@ Reference frames, transforms, and trig for embedded processing of AC power signa
 At the core of the library are data structs which represent three-phase AC phasors in different reference frames.  The structs have transforms to support conversions between different reference frames.
 
 ```rust
-use ac_power::reference_frames::{Abc, AlphaBeta0};
+use ac_power::{Abc, AlphaBeta0};
 
 // create a phasor in Abc reference frame
 let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
@@ -21,7 +21,7 @@ let alpha_beta_zero = AlphaBeta0::from(abc);
 The library also include [trigometric functions](crate::trig), which are useful when converting between stationary and roatating reference frames.
 
 ```rust
-use ac_power::reference_frames::{Abc, Dq0};
+use ac_power::{Abc, Dq0};
 use ac_power::trig::{Theta, cos_sin};
 
 // create a phasor in Abc reference frame
@@ -47,7 +47,7 @@ If you muliply a voltage phasor by current phasor, you get a `Pq` struct returne
 
 ```rust
 
-use ac_power::reference_frames::{Abc, Dq0, AlphaBeta, Polar};
+use ac_power::{Abc, Dq0, AlphaBeta, Polar};
 use ac_power::trig::{Theta, cos_sin};
 use ac_power::newtypes::{Voltage, Current};
 use approx::assert_abs_diff_eq;
@@ -84,7 +84,7 @@ Many inverter control systems that implement advanced grid controls or grid form
 Bellow is an example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
 
 ```rust
-use ac_power::reference_frames::{Abc, AlphaBeta, Dq};
+use ac_power::{Abc, AlphaBeta, Dq};
 use ac_power::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
 use ac_power::newtypes::Voltage;
 use idsp::iir::{Action, Biquad, Pid};
