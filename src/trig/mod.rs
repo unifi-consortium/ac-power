@@ -14,15 +14,18 @@
 //    limitations under the License.
 
 /*!
-This module contains trigometric data-types, methods, and functions useful for ac power signal processing.  The sin, cos, and arctan functions are wrappers around the [idsp](https://crates.io/crates/idsp) crate implementations, which are implemented with optimized fixed-point arithmetic for resource constrained platforms (i.e. microcontrollers).
+
+Trigometric functions and data types for processing ac power signals.
+
+The sin, cos, and arctan functions are wrappers around the [idsp](https://crates.io/crates/idsp) crate implementations, which are implemented with optimized fixed-point arithmetic for resource constrained platforms (i.e. microcontrollers).
 
 # Newtypes
 
 This module defines three new data types which are wrappers around i32 and f32 prmitives
 
-1. [struct Theta(i32)](crate::trig::Theta) - Representation of a phase between -180 and + 180 degres (-pi to + pi)
-2. [struct Sin(f32)](crate::trig::Sin)- Representation of a sin(theta)
-3. [struct Cos(f32)](crate::trig::Cos) - Representation of a cos(theta)
+1. [Theta(i32)](crate::trig::Theta) - Representation of a phase between -180 and + 180 degres (-pi to + pi)
+2. [Sin(f32)](crate::trig::Sin)- Representation of a sin(theta)
+3. [Cos(f32)](crate::trig::Cos) - Representation of a cos(theta)
 
 Each newtype contains constructors for instantiating on instance from a variable
 
@@ -187,10 +190,10 @@ pub fn shift_left_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
 /// let theta = Theta::from_radians(radians);
 /// let (cos0, sin0) = (Cos::from(1.0), Sin::from(0.0));
 /// let (cos1, sin1) = cos_sin(theta);
-/// let (cos2, sin2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
-/// let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
+/// let (cos2, sin2) = chebyshev(cos1, cos1, sin1, cos0, sin0);
+/// let (cos3, sin3) = chebyshev(cos1, cos2, sin2, cos1, sin1);
 /// ```
-pub fn chebyshev(cos: Cos, sin1: Sin, cos1: Cos, sin2: Sin, cos2: Cos) -> (Cos, Sin) {
+pub fn chebyshev(cos: Cos, cos1: Cos, sin1: Sin, cos2: Cos, sin2: Sin) -> (Cos, Sin) {
     let cosn = 2.0 * (cos * cos1) - f32::from(cos2);
     let sinn = 2.0 * (cos * sin1) - f32::from(sin2);
     (cosn.into(), sinn.into())
@@ -258,8 +261,8 @@ mod tests {
         let theta = Theta::from_radians(radians);
         let (cos0, sin0) = (Cos::from(1.0), Sin::from(0.0));
         let (cos1, sin1) = cos_sin(theta);
-        let (cos2, sin2) = chebyshev(cos1, sin1, cos1, sin0, cos0);
-        let (cos3, sin3) = chebyshev(cos1, sin2, cos2, sin1, cos1);
+        let (cos2, sin2) = chebyshev(cos1, cos1, sin1, cos0, sin0);
+        let (cos3, sin3) = chebyshev(cos1, cos2, sin2, cos1, sin1);
 
         assert_abs_diff_eq!(f32::from(sin2), (2.0 * radians).sin(), epsilon = 0.0001);
         assert_abs_diff_eq!(f32::from(cos2), (2.0 * radians).cos(), epsilon = 0.0001);

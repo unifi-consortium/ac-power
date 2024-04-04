@@ -6,12 +6,12 @@ Reference frames, transforms, and trig for embedded processing of AC power signa
 
 # How to use
 
-At the core of the library are data structs which represent three-phase AC phasors in different reference frames.  The structs have transforms to support conversions between different reference frames.
+At the core of the library are data structs which represent three-phase AC vectors in different reference frames.  The structs have transforms to support conversions between different reference frames.
 
 ```rust
 use ac_power::{Abc, AlphaBeta0};
 
-// create a phasor in Abc reference frame
+// create a vector in Abc reference frame
 let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
 
 // convert to alpha-beta
@@ -24,7 +24,7 @@ The library also include [trigometric functions](crate::trig), which are useful 
 use ac_power::{Abc, Dq0};
 use ac_power::trig::{Theta, cos_sin};
 
-// create a phasor in Abc reference frame
+// create a vector in Abc reference frame
 let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
 
 // convert to Dq0
@@ -43,7 +43,7 @@ let v: Voltage = i * z;
 let p: Power = v * i;
 ```
 
-If you muliply a voltage phasor by current phasor, you get a `Pq` struct returned.  This is a basic use case to calculate real and reactive powers from three-phase voltage and current data.
+If you muliply a voltage vector by current vector, you get a `Pq` struct returned.  This is a basic use case to calculate real and reactive powers from three-phase voltage and current data.
 
 ```rust
 
@@ -56,7 +56,7 @@ use approx::assert_abs_diff_eq;
 let v_mag = Voltage::from(340.0);
 let i_mag = Current::from(8.2);
 
-// create voltage and current phasors in the Abc reference frame
+// create voltage and current vectors in the Abc reference frame
 let v = Abc::from_polar(v_mag, Theta::from_degrees(0.0));
 let i = Abc::from_polar(i_mag, Theta::from_degrees(45.0));
 

@@ -34,7 +34,7 @@ impl<const N: usize, T: Num> Waveform<N, T> {
             let sinn2 = sinn1;
             cosn1 = cosn;
             sinn1 = sinn;
-            (cosn, sinn) = chebyshev(cos, sinn1, cosn1, sinn2, cosn2);
+            (cosn, sinn) = chebyshev(cos, cosn1, sinn1, cosn2, sinn2);
         }
 
         abc

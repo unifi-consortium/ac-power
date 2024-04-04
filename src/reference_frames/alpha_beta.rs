@@ -1,10 +1,11 @@
-// Balanced reference frames
+/// Balanced stationary orthoganal reference frame (i.e. clarke)
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct AlphaBeta<T> {
     pub alpha: T,
     pub beta: T,
 }
 
+/// Unbalanced stationary orthoganal reference frame (i.e. clarke)
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct AlphaBeta0<T> {
     pub alpha: T,
