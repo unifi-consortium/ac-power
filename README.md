@@ -4,9 +4,23 @@
 
 Reference frames, transforms, and trig for embedded processing of AC power signals.
 
-# How to use
+# Reference Frames
 
-At the core of the library are data structs which represent three-phase AC vectors in different reference frames.  The structs have transforms to support conversions between different reference frames.
+At the core of the library are data structs which represent three-phase AC vectors in different reference frames.
+
+The crate supports 6 difference reference frames.  These include 3 balanced reference frames:
+
+1.  [Polar](crate::reference_frames::Polar) - Polar representation (amplitude and angle)
+2.  [AlphaBeta](crate::reference_frames::AlphaBeta) - Orthogonal (alpha and beta) stationary reference frame representation
+3.  [Dq](crate::reference_frames::Dq) - Two axis (d and q) rotating reference frame representation
+
+And three reference frames for unbalanced representations (supports a zero sequence component):
+
+1.  [Abc](crate::reference_frames::Abc) - Instantaneous signals
+2.  [AlphaBeta0](crate::reference_frames::AlphaBeta0) - Orthogonal(alpha and beta) stationary reference frame representation with zero
+3.  [Dq0](crate::reference_frames::Dq0) - Two axis (d and q) rotating reference frame representation with zero
+
+Converting between reference frames invokes power theory transforms.
 
 ```rust
 use ac_power::{Abc, AlphaBeta0};
@@ -18,7 +32,13 @@ let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
 let alpha_beta_zero = AlphaBeta0::from(abc);
 ```
 
-The library also include [trigometric functions](crate::trig), which are useful when converting between stationary and roatating reference frames.
+<div class="warning">This crate uses a power-variant rather than power-invariant versions of the transforms, which seems to be the more common convention among industry tooling and DSP.</div>
+
+<div class="warning">Due to floating point rounding errors, these transforms are not perfectly reversible.  For example if you did the following conversion Abc-->AlphaBeta-->Abc, the resulting Abc value would not be exactly equal to the original.</div>
+
+# Trigonometry
+
+The library also includes a [trig module](crate::trig), which is useful when converting between stationary and rotating reference frames.
 
 ```rust
 use ac_power::{Abc, Dq0};
@@ -32,10 +52,27 @@ let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
 let dq0 = abc.to_dq0(cos, sin);
 ```
 
-The reference frames are implemented with generics, so you can use any data-type that implements the necessary numeric traits.  The crate comes with four built-in: `Voltage(f32)`, `Current(f32)`, `Power(f32)`, and `Impedance(f32)`.
+There are additional functions in the [trig module](crate::trig) for rotating Sin/Cos pairs or generating Sin(Nx), Cos(Nx) pairs using Chebyshev method.
+
+# Newtypes
+
+From the example above we see that there are some [newtypes](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) defined in this crate.  Specifically, there are three defined in the [trig module](crate::trig):
+
+1. [Theta(i32)](crate::Theta) - An angle between -pi/2 and pi/2 radians
+2. [Sin(f32)](crate::Sin) - Sin of an angle
+3. [Cos(f32)](crate::Cos) - Cos of an angle
+
+There are also 4 additional [newtypes](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) defined in this crate:
+
+1. [Voltage(f32)](crate::Voltage) - An electric voltage
+2. [Current(f32)](crate::Current) - An electric current
+3. [Power(f32)](crate::Power) - An electric power
+4. [Impedance(f32)](crate::Impedance) - An electric impedance
+
+Meaningful type conversions automatically occur during mulitplication of different types.
 
 ```rust
-use ac_power::newtypes::{Voltage, Current, Power, Impedance};
+use ac_power::{Voltage, Current, Power, Impedance};
 
 let z = Impedance::from(10.0);
 let i = Current::from(1.5);
@@ -43,13 +80,23 @@ let v: Voltage = i * z;
 let p: Power = v * i;
 ```
 
-If you muliply a voltage vector by current vector, you get a `Pq` struct returned.  This is a basic use case to calculate real and reactive powers from three-phase voltage and current data.
+The reference frames are implemented with generics, so they can be used with regular `f32`s as seen in the examples above, or any data-type that implements the necessary numeric traits.  The 4 additional [newtypes](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) defined above all do.
+
+```rust
+use ac_power::{Abc, Voltage};
+
+// define a voltage vector in Abc reference frame
+let v: Abc::<Voltage> = Abc {a: 1.0.into(), b: 2.0.into(), c: 3.0.into()};
+```
+
+# Power Calculations
+
+When you create AC reference frame vectors out of [Voltage](crate::Voltage) and [Current](crate::Current) types, they can be multiplied by each other to return a [Pq](crate::pq::Pq) struct.  This is a basic use case to calculate real and reactive powers from three-phase voltage and current data.
 
 ```rust
 
-use ac_power::{Abc, Dq0, AlphaBeta, Polar};
+use ac_power::{Abc, Dq0, AlphaBeta, Polar, Voltage, Current};
 use ac_power::trig::{Theta, cos_sin};
-use ac_power::newtypes::{Voltage, Current};
 use approx::assert_abs_diff_eq;
 
 // set the magnitude of the voltage and current
@@ -79,14 +126,18 @@ assert_abs_diff_eq!(f32::from(pf), 0.707, epsilon = 0.0001);
 
 ```
 
-Many inverter control systems that implement advanced grid controls or grid forming controls also rely on the transforms implemented in this crate.  Use of this crate can not only make the application code much more readible, it can improve performance and elinate bugs due to the extensive optimization and verification of this crate.
+# Advanced Use Cases
+
+Many inverter control systems that implement advanced grid controls or grid forming controls also rely on the transforms implemented in this crate.  Use of this crate can not only make the application code much more readible, it can improve performance and eliminate bugs due to the extensive optimization and verification of this crate.  Bellow are a few examples.
+
+## A Grid Synchronizing Phased-Locked-Loop (PLL)
 
 Bellow is an example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
 
 ```rust
 use ac_power::{Abc, AlphaBeta, Dq};
-use ac_power::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
-use ac_power::newtypes::Voltage;
+use ac_power::trig::{cos_sin, Cos, Sin, Theta};
+use ac_power::Voltage;
 use idsp::iir::{Action, Biquad, Pid};
 
 pub struct Pll {
@@ -158,47 +209,51 @@ impl Pll {
 }
 ```
 
-# Reference frames
+## A Three-Phase Waveform Generator
 
-The crate supports 6 difference reference frames.  These include 3 balanced reference frames:
+Bellow is an example of a three-phase waveform generator that supports unbalanced representations as well as harmonics.
 
-1.  [Polar](crate::reference_frames::Polar) - Polar representation (aplitude and angle)
-2.  [AlphaBeta](crate::reference_frames::AlphaBeta) - Two axis (alpha and beta) stationary reference frame representation
-3.  [Dq](crate::reference_frames::Dq) - Two axis (d and q) rotating reference frame representation
+```rust
+use crate::number::Num;
+use crate::reference_frames::{Abc, Dq};
+use crate::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
 
-And three reference frames for unbalanced representations (supports a zero sequence component):
+pub struct Waveform<const N: usize, T> {
+    pub positive: [Dq<T>; N],
+    pub negative: [Dq<T>; N],
+    pub zero: Dq<T>,
+}
 
-1.  [Abc](crate::reference_frames::Abc) - Instantaneous signals
-2.  [AlphaBeta0](crate::reference_frames::AlphaBeta0) - Two axis (alpha and beta) stationary reference frame representation with zero
-3.  [Dq0](crate::reference_frames::Dq0) - Two axis (d and q) rotating reference frame representation with zero
+impl<const N: usize, T: Num> Waveform<N, T> {
+    pub fn new() -> Self {
+        Self {
+            positive: [Dq::zero(); N],
+            negative: [Dq::zero(); N],
+            zero: Dq::zero(),
+        }
+    }
 
-# Transforms
+    pub fn calculate(&self, theta: Theta) -> Abc<T> {
+        let (cos, sin) = cos_sin(theta);
 
-The crate supports for following lossless conversions (zero sequence retained):
+        let mut abc = Abc::zero() + self.zero.d * sin + self.zero.q * cos;
 
-| From                                                  | To                                                   |
-| :---------------------------------------------------- |:----------------------------------------------------:|
-| [Abc](crate::reference_frames::Abc)                   | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
-| [Abc](crate::reference_frames::Abc)                   | [Dq0](crate::reference_frames::Dq0)                  |
-| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [Abc](crate::reference_frames::Abc)                  |
-| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [Dq0](crate::reference_frames::Dq0)                  |
-| [Dq0](crate::reference_frames::Dq0)                   | [Abc](crate::reference_frames::Abc)                  |
-| [Dq0](crate::reference_frames::Dq0)                   | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
-| [AlphaBeta](crate::reference_frames::Dq0)             | [Abc](crate::reference_frames::Abc)                  |
-| [AlphaBeta](crate::reference_frames::Dq0)             | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
-| [AlphaBeta](crate::reference_frames::Dq0)             | [Dq0](crate::reference_frames::Dq0)                  |
-| [Dq](crate::reference_frames::Dq0)                    | [Abc](crate::reference_frames::Abc)                  |
-| [Dq](crate::reference_frames::Dq0)                    | [AlphaBeta0](crate::reference_frames::AlphaBeta0)    |
-| [Dq](crate::reference_frames::Dq0)                    | [Dq0](crate::reference_frames::Dq0)                  |
+        // add the harmonics
+        let (mut cosn1, mut sinn1) = (Cos::from(1.0), Sin::from(0.0));
+        let (mut cosn, mut sinn) = (cos, sin);
+        for (pos, neg) in self.positive.iter().zip(self.negative.iter()) {
+            abc += pos.to_abc(cosn, sinn);
+            abc += neg.to_abc(cosn, -sinn);
 
-The crate supports the following lossy conversions (zero sequence lost):
+            // use chebychev function to calculate cos, sin of next harmonic
+            let cosn2 = cosn1;
+            let sinn2 = sinn1;
+            cosn1 = cosn;
+            sinn1 = sinn;
+            (cosn, sinn) = chebyshev(cos, cosn1, sinn1, cosn2, sinn2);
+        }
 
-| From                                                  | To                                                 |
-| :---------------------------------------------------- |:--------------------------------------------------:|
-| [Abc](crate::reference_frames::Abc)                   | [AlphaBeta](crate::reference_frames::AlphaBeta)    |
-| [Abc](crate::reference_frames::Abc)                   | [Dq](crate::reference_frames::Dq)                  |
-| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [AlphaBeta](crate::reference_frames::AlphaBeta)    |
-| [AlphaBeta0](crate::reference_frames::AlphaBeta0)     | [Dq](crate::reference_frames::Dq)                  |
-| [Dq0](crate::reference_frames::Dq0)                   | [AlphaBeta](crate::reference_frames::AlphaBeta)    |
-| [Dq0](crate::reference_frames::Dq0)                   | [Dq](crate::reference_frames::Dq)                  |
-
+        abc
+    }
+}
+```

@@ -18,15 +18,17 @@
 #![feature(const_trait_impl)]
 
 pub mod constants;
-pub mod newtypes;
+mod newtypes;
 pub mod number;
 mod pq;
 mod reference_frames;
 pub mod trig;
 pub mod wavegen;
 
+pub use newtypes::{Current, Impedance, Power, Voltage};
 pub use pq::Pq;
 pub use reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
+pub use trig::{Cos, Sin, Theta};
 
 #[cfg(test)]
 mod tests {}

@@ -52,7 +52,7 @@ let sin_as_float: f32 = sin.into();
 
 ```rust
 use ac_power::trig::Sin;
-use ac_power::newtypes::Voltage;
+use ac_power::Voltage;
 use approx::assert_abs_diff_eq;
 
 let sin = Sin::from_degrees(45.0);

@@ -10,6 +10,7 @@ fn normalize(x: f32, y: f32) -> (i32, i32) {
     (xn, yn)
 }
 
+/// Instantaneous real (p) and reactive (q) powers
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Pq {
     pub p: Power,
