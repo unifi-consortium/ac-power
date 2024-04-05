@@ -58,9 +58,9 @@ There are additional functions in the [trig module](crate::trig) for rotating Si
 
 From the example above we see that there are some [newtypes](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) defined in this crate.  Specifically, there are three defined in the [trig module](crate::trig):
 
-1. [Theta(i32)](crate::Theta) - An angle between -pi/2 and pi/2 radians
-2. [Sin(f32)](crate::Sin) - Sin of an angle
-3. [Cos(f32)](crate::Cos) - Cos of an angle
+1. [Theta(i32)](crate::trig::Theta) - An angle between -pi/2 and pi/2 radians
+2. [Sin(f32)](crate::trig::Sin) - Sin of an angle
+3. [Cos(f32)](crate::trig::Cos) - Cos of an angle
 
 There are also 4 additional [newtypes](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) defined in this crate:
 
@@ -214,17 +214,17 @@ impl Pll {
 Bellow is an example of a three-phase waveform generator that supports unbalanced representations as well as harmonics.
 
 ```rust
-use crate::number::Num;
-use crate::reference_frames::{Abc, Dq};
-use crate::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
+use ac_power::number::Num;
+use ac_power::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
+use ac_power::{Abc, Dq};
 
-pub struct Waveform<const N: usize, T> {
+pub struct Waveform<T, const N: usize> {
     pub positive: [Dq<T>; N],
     pub negative: [Dq<T>; N],
     pub zero: Dq<T>,
 }
 
-impl<const N: usize, T: Num> Waveform<N, T> {
+impl<T: Num, const N: usize> Waveform<T, N> {
     pub fn new() -> Self {
         Self {
             positive: [Dq::zero(); N],

@@ -1,14 +1,16 @@
 use crate::number::Num;
-use crate::reference_frames::{Abc, Dq};
 use crate::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
+use crate::{Abc, Dq};
 
-pub struct Waveform<const N: usize, T> {
+/// A simple three-phase waveform generator
+
+pub struct Waveform<T, const N: usize> {
     pub positive: [Dq<T>; N],
     pub negative: [Dq<T>; N],
     pub zero: Dq<T>,
 }
 
-impl<const N: usize, T: Num> Waveform<N, T> {
+impl<T: Num, const N: usize> Waveform<T, N> {
     pub fn new() -> Self {
         Self {
             positive: [Dq::zero(); N],

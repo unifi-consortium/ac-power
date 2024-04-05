@@ -28,7 +28,6 @@ pub mod wavegen;
 pub use newtypes::{Current, Impedance, Power, Voltage};
 pub use pq::Pq;
 pub use reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
-pub use trig::{Cos, Sin, Theta};
 
 #[cfg(test)]
 mod tests {}
