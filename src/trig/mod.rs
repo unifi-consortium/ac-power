@@ -23,7 +23,7 @@ The sin, cos, and arctan functions are wrappers around the [idsp](https://crates
 
 This module defines three new data types which are wrappers around i32 and f32 prmitives
 
-1. [Theta(i32)](crate::trig::Theta) - Representation of a phase between -180 and + 180 degres (-pi to + pi)
+1. [Theta(i32)](crate::trig::Theta) - Representation of a phase between -π and +π radians
 2. [Sin(f32)](crate::trig::Sin)- Representation of a sin(theta)
 3. [Cos(f32)](crate::trig::Cos) - Representation of a cos(theta)
 

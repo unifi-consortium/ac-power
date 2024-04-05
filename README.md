@@ -32,7 +32,7 @@ let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
 let alpha_beta_zero = AlphaBeta0::from(abc);
 ```
 
-<div class="warning">This crate uses a power-variant rather than power-invariant versions of the transforms, which seems to be the more common convention among industry tooling and DSP.</div>
+<div class="warning">This crate uses power-variant rather than power-invariant versions of the transforms, which seem to be the more common convention among industry tooling and DSP.  The integrated power calculations account for this and implement the appropriate scaling.</div>
 
 <div class="warning">Due to floating point rounding errors, these transforms are not perfectly reversible.  For example if you did the following conversion Abc-->AlphaBeta-->Abc, the resulting Abc value would not be exactly equal to the original.</div>
 
@@ -58,7 +58,7 @@ There are additional functions in the [trig module](crate::trig) for rotating Si
 
 From the example above we see that there are some [newtypes](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) defined in this crate.  Specifically, there are three defined in the [trig module](crate::trig):
 
-1. [Theta(i32)](crate::trig::Theta) - An angle between -pi/2 and pi/2 radians
+1. [Theta(i32)](crate::trig::Theta) - An angle between -π and π radians
 2. [Sin(f32)](crate::trig::Sin) - Sin of an angle
 3. [Cos(f32)](crate::trig::Cos) - Cos of an angle
 

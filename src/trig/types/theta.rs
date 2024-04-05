@@ -4,6 +4,7 @@ use core::convert::From;
 use core::fmt;
 use core::ops::AddAssign;
 
+/// Representation of an angle between -π and π radians
 #[derive(Copy, Clone, PartialEq)]
 pub struct Theta(i32);
 

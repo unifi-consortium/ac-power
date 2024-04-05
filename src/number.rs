@@ -1,3 +1,7 @@
+/*!
+Definition of the numeric trait required for the reference frames elements
+*/
+
 use crate::newtypes::{Current, Power, Voltage};
 use crate::trig::{Cos, Sin};
 use core::fmt::Debug;

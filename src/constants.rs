@@ -1,4 +1,7 @@
-// define constants for f32
+/*!
+Common constants used in instantaneos power theory
+*/
+
 pub const ONE_THIRD: f32 = 0.3333333333333333;
 pub const TWO_THIRDS: f32 = 0.6666666666666666;
 pub const SQRT_3_OVER_3: f32 = 0.5773502691896257;

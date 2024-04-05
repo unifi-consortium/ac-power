@@ -5,6 +5,7 @@ use core::convert::From;
 use core::ops::{Mul, Neg};
 use derive_more::{From, Into};
 
+/// Cos of an angle
 #[derive(Debug, Copy, Clone, PartialEq, From, Into)]
 pub struct Cos(f32);
 
