@@ -145,7 +145,7 @@ pub struct Pll {
 
     // loop filter
     filter: Biquad<f32>,
-    filter_state: [f32; 2], // uses direct form 2 transposed, which is optimized for floating point
+    filter_state: [f32; 2],
 
     // frequency/angle
     pub theta: Theta,
