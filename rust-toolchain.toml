@@ -1,2 +1,2 @@
 [toolchain]
-channel = "default"
+channel = "stable"
