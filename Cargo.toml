@@ -7,6 +7,8 @@ license = "Apache-2.0"
 categories = ["no-std"]
 description = "Reference frames and transforms for ac power analysis"
 keywords = ["ac", "power", "ac-power", "instantaneous power"]
+repository = "https://github.com/unifi-consortium/ac-power"
+readme = "README.md"
 
 [dependencies]
 idsp = "0.15.1"
