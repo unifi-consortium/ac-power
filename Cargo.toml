@@ -11,7 +11,8 @@ repository = "https://github.com/unifi-consortium/ac-power"
 readme = "README.md"
 
 [dependencies]
-idsp = "0.15.1"
+# idsp = "0.15.1"
+idsp = {git="https://github.com/quartiq/idsp", tag="main"}  # FIXME: Switch to next release, which should pass no_std check
 derive_more = "0.99.17"
 
 [dev-dependencies]
