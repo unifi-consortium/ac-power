@@ -83,6 +83,20 @@ impl<T: Num> From<AlphaBeta0<T>> for Abc<T> {
 }
 
 impl<T: Num> AlphaBeta<T> {
+    /// Transform from AlphaBeta to Dq0 reference frame using Clarke transfom
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ac_power::{Abc, AlphaBeta};
+    /// use ac_power::trig::{Theta, cos_sin};
+    ///
+    /// let theta = Theta::from_degrees(45.0);
+    /// let (cos, sin) = cos_sin(theta);
+    /// let alpha_beta = AlphaBeta::from(Abc::from_polar(100.0, theta));
+    /// let dq0 = alpha_beta.to_dq0(cos, sin);
+    /// ```
     pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0<T> {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
@@ -94,6 +108,20 @@ impl<T: Num> AlphaBeta<T> {
         }
     }
 
+    /// Transform from AlphaBeta to Dq reference frame using Clarke transfom
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ac_power::{Abc, AlphaBeta};
+    /// use ac_power::trig::{Theta, cos_sin};
+    ///
+    /// let theta = Theta::from_degrees(45.0);
+    /// let (cos, sin) = cos_sin(theta);
+    /// let alpha_beta = AlphaBeta::from(Abc::from_polar(100.0, theta));
+    /// let dq = alpha_beta.to_dq(cos, sin);
+    /// ```
     pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq<T> {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
@@ -103,6 +131,20 @@ impl<T: Num> AlphaBeta<T> {
 }
 
 impl<T: Num> AlphaBeta0<T> {
+    //// Transform from AlphaBeta0 to Dq0 reference frame using Clarke transfom
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ac_power::{Abc, AlphaBeta0};
+    /// use ac_power::trig::{Theta, cos_sin};
+    ///
+    /// let theta = Theta::from_degrees(45.0);
+    /// let (cos, sin) = cos_sin(theta);
+    /// let alpha_beta = AlphaBeta0::from(Abc::from_polar(100.0, theta));
+    /// let dq0 = alpha_beta.to_dq0(cos, sin);
+    /// ```
     pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0<T> {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
@@ -114,6 +156,20 @@ impl<T: Num> AlphaBeta0<T> {
         }
     }
 
+    //// Transform from AlphaBeta0 to Dq reference frame using Clarke transfom
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ac_power::{Abc, AlphaBeta0};
+    /// use ac_power::trig::{Theta, cos_sin};
+    ///
+    /// let theta = Theta::from_degrees(45.0);
+    /// let (cos, sin) = cos_sin(theta);
+    /// let alpha_beta = AlphaBeta0::from(Abc::from_polar(100.0, theta));
+    /// let dq = alpha_beta.to_dq(cos, sin);
+    /// ```
     pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq<T> {
         let d = (self.alpha * sin) - (self.beta * cos);
         let q = (self.alpha * cos) + (self.beta * sin);
