@@ -1,6 +1,6 @@
 [package]
 name = "ac-power"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
 authors = ["donny zimmanck <dzimmanck@enphaseenergy.com"]
 license = "Apache-2.0"
@@ -13,6 +13,7 @@ readme = "README.md"
 [dependencies]
 idsp = "0.15.1"
 derive_more = "0.99.17"
+micromath = "2.1.0"
 
 [dev-dependencies]
 approx = "0.5.1"

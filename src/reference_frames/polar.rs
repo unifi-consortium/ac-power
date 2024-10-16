@@ -13,11 +13,19 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+use crate::number::Num;
 use crate::trig::Theta;
+use crate::Abc;
 
 /// Polar reference frame (just amplitude and angle)
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Polar<T> {
     pub amplitude: T,
     pub theta: Theta,
+}
+
+impl<T: Num> From<Polar<T>> for Abc<T> {
+    fn from(polar: Polar<T>) -> Self {
+        Self::from_polar(polar.amplitude, polar.theta)
+    }
 }

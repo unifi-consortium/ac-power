@@ -26,7 +26,9 @@ pub mod wavegen;
 
 pub use newtypes::{Current, Impedance, Power, Voltage};
 pub use pq::Pq;
-pub use reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar};
+pub use reference_frames::{
+    lines_to_seq, seq_to_lines, Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Polar,
+};
 
 #[cfg(test)]
 mod tests {}

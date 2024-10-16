@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 ### Changes
 ### Added
+-Added more algabraic operations to the reference frames
+-Add line phasor to sequence phasor transforms
+
 
 ## v0.1.0
 

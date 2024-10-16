@@ -14,7 +14,7 @@
 //    limitations under the License.
 
 use crate::trig::{Cos, Sin};
-use core::ops::{Mul, MulAssign};
+use core::ops::{Div, Mul, MulAssign};
 use core::primitive::f32;
 use derive_more::{Add, AddAssign, From, Into, Neg, Sub};
 
@@ -45,17 +45,24 @@ macro_rules! impl_trig_ops {
 macro_rules! impl_number {
     ($t:ty) => {
         impl Mul<f32> for $t {
-            fn mul(self, other: f32) -> $t {
-                (self.0 * other).into()
+            fn mul(self, rhs: f32) -> $t {
+                (self.0 * rhs).into()
             }
             type Output = $t;
         }
 
         impl Mul<$t> for f32 {
-            fn mul(self, other: $t) -> $t {
-                (self * other.0).into()
+            fn mul(self, rhs: $t) -> $t {
+                (self * rhs.0).into()
             }
             type Output = $t;
+        }
+
+        impl Div<$t> for $t {
+            fn div(self, rhs: $t) -> f32 {
+                self.0 / rhs.0
+            }
+            type Output = f32;
         }
 
         impl_trig_ops!(Sin, $t);
@@ -64,19 +71,19 @@ macro_rules! impl_number {
 }
 
 /// A newtype representing an electric voltage (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, From, Into)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
 pub struct Voltage(f32);
 
 /// A newtype representing an electric current (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, From, Into)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
 pub struct Current(f32);
 
 /// A newtype representing an electric power (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, From, Into)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
 pub struct Power(f32);
 
 /// A newtype representing an electric impedance (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, From, Into)]
+#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
 pub struct Impedance(f32);
 
 // derive operations for the new-types
