@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 -Added more algabraic operations to the reference frames
 -Add line phasor to sequence phasor transforms
+-Break transforms into multiple files
 
 
 ## v0.1.0
