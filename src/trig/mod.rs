@@ -217,6 +217,20 @@ mod tests {
         assert_abs_diff_eq!(f32::from(cos), radians.cos(), epsilon = 0.0001);
     }
 
+    // #[test]
+    // fn test_rotate() {
+    //     let radians: f32 = 1.2;
+    //     let theta0 = Theta::from_degrees(70.0);
+    //     let theta1 = Theta::from_degrees(30.0);
+    //     let (cos, sin) = cos_sin(theta0);
+    //     let (cosd, sind) = cos_sin(theta1);
+    //     let (cosr, sinr) = rotate(cos, sin, cosd, sind);
+    //     let (cosr_expected, sinr_expected) = cos_sin(Theta::from_degrees(100.0));
+
+    //     assert_abs_diff_eq!(f32::from(cosr), f32::from(cosr_expected), epsilon = 0.0001);
+    //     assert_abs_diff_eq!(f32::from(sinr), f32::from(sinr_expected), epsilon = 0.0001);
+    // }
+
     #[test]
     fn neg_shift() {
         let radians: f32 = 1.2;

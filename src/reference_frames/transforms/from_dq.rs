@@ -51,9 +51,9 @@ impl<T: Num> Dq<T> {
             }
         }
 
-        let a = (self.d * cos) + (self.q * sin);
-        let b = (self.d * cos_b) + (self.q * sin_b);
-        let c = (self.d * cos_c) + (self.q * sin_c);
+        let a = (self.d * cos) - (self.q * sin);
+        let b = (self.d * cos_b) - (self.q * sin_b);
+        let c = (self.d * cos_c) - (self.q * sin_c);
 
         Abc { a, b, c }
     }

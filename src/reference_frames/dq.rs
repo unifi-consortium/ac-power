@@ -13,6 +13,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 use crate::number::Num;
 use crate::trig::rotate;
 use crate::trig::{Cos, Sin};
@@ -218,6 +219,57 @@ impl<
     pub fn rotate(&self, cos: Cos, sin: Sin) -> Dq<T> {
         let (d, q) = rotate(self.d, self.q, cos, sin);
         Dq { d, q }
+    }
+    pub fn rotate_120(&self) -> Dq<T> {
+        self.rotate((-ONE_HALF).into(), SQRT_3_OVER_2.into())
+    }
+    pub fn rotate_240(&self) -> Dq<T> {
+        self.rotate((-ONE_HALF).into(), (-SQRT_3_OVER_2).into())
+    }
+}
+
+impl From<Dq<Voltage>> for Dq<Current> {
+    fn from(item: Dq<Voltage>) -> Self {
+        Self {
+            d: f32::from(item.d).into(),
+            q: f32::from(item.q).into(),
+        }
+    }
+}
+
+impl From<Dq<Voltage>> for Dq<f32> {
+    fn from(item: Dq<Voltage>) -> Self {
+        Self {
+            d: item.d.into(),
+            q: item.q.into(),
+        }
+    }
+}
+
+impl From<Dq<Current>> for Dq<f32> {
+    fn from(item: Dq<Current>) -> Self {
+        Self {
+            d: item.d.into(),
+            q: item.q.into(),
+        }
+    }
+}
+
+impl From<Dq<f32>> for Dq<Voltage> {
+    fn from(item: Dq<f32>) -> Self {
+        Self {
+            d: item.d.into(),
+            q: item.q.into(),
+        }
+    }
+}
+
+impl From<Dq<f32>> for Dq<Current> {
+    fn from(item: Dq<f32>) -> Self {
+        Self {
+            d: item.d.into(),
+            q: item.q.into(),
+        }
     }
 }
 

@@ -2,51 +2,22 @@ mod from_abc;
 mod from_alpha_beta;
 mod from_dq;
 
-use crate::constants::{FRAC_1_2SQRT3, ONE_HALF, ONE_SIXTH, ONE_THIRD, SQRT_3_OVER_2};
+use crate::constants::ONE_THIRD;
 use crate::number::Num;
 use crate::reference_frames::Dq;
 
 /// Convert pos, neg, zero Dq's to line Dq's
 pub fn seq_to_lines<T: Num>(pos: Dq<T>, neg: Dq<T>, zero: Dq<T>) -> (Dq<T>, Dq<T>, Dq<T>) {
-    let a = Dq {
-        d: pos.d - neg.d + zero.d,
-        q: pos.q + neg.q + zero.q,
-    };
-    let b = Dq {
-        d: -pos.d * ONE_HALF + pos.q * SQRT_3_OVER_2 + neg.d * ONE_HALF - neg.q * SQRT_3_OVER_2
-            + zero.d,
-        q: -pos.d * SQRT_3_OVER_2 - pos.q * ONE_HALF - neg.d * SQRT_3_OVER_2 - neg.q * ONE_HALF
-            + zero.q,
-    };
-    let c = Dq {
-        d: -pos.d * ONE_HALF - pos.q * SQRT_3_OVER_2
-            + neg.d * ONE_HALF
-            + neg.q * SQRT_3_OVER_2
-            + zero.d,
-        q: pos.d * SQRT_3_OVER_2 - pos.q * ONE_HALF + neg.d * SQRT_3_OVER_2 - neg.q * ONE_HALF
-            + zero.q,
-    };
-
+    let a = pos + neg + zero;
+    let b = pos.rotate_240() + neg.rotate_120() + zero;
+    let c = pos.rotate_120() + neg.rotate_240() + zero;
     (a, b, c)
 }
 
 /// Convert line phasors to pos, neg, zero
 pub fn lines_to_seq<T: Num>(a: Dq<T>, b: Dq<T>, c: Dq<T>) -> (Dq<T>, Dq<T>, Dq<T>) {
-    let pos = Dq {
-        d: a.d * ONE_THIRD - b.d * ONE_SIXTH - b.q * FRAC_1_2SQRT3 - c.d * ONE_SIXTH
-            + c.q * FRAC_1_2SQRT3,
-        q: a.q * ONE_THIRD + b.d * FRAC_1_2SQRT3
-            - b.q * ONE_SIXTH
-            - c.d * FRAC_1_2SQRT3
-            - c.q * ONE_SIXTH,
-    };
-    let neg = Dq {
-        d: -a.d * ONE_THIRD + b.d * ONE_SIXTH - b.q * FRAC_1_2SQRT3
-            + c.d * ONE_SIXTH
-            + c.q * FRAC_1_2SQRT3,
-        q: a.q * ONE_THIRD - b.d * FRAC_1_2SQRT3 - b.q * ONE_SIXTH + c.d * FRAC_1_2SQRT3
-            - c.q * ONE_SIXTH,
-    };
+    let pos = (a + b.rotate_120() + c.rotate_240()) * ONE_THIRD;
+    let neg = (a + b.rotate_240() + c.rotate_120()) * ONE_THIRD;
     let zero = (a + b + c) * ONE_THIRD;
 
     (pos, neg, zero)
@@ -104,9 +75,9 @@ mod tests {
 
             // calculate the instantaneous a, b, c from phasors
             let abc_phasor = Abc {
-                a: dq_a.d * sin + dq_a.q * cos,
-                b: dq_b.d * sin + dq_b.q * cos,
-                c: dq_c.d * sin + dq_c.q * cos,
+                a: dq_a.d * cos - dq_a.q * sin,
+                b: dq_b.d * cos - dq_b.q * sin,
+                c: dq_c.d * cos - dq_c.q * sin,
             };
 
             // calculate the instantaneous a, b, c from sequences
@@ -138,9 +109,9 @@ mod tests {
         for angle in angles.iter() {
             let theta = Theta::from_degrees(*angle);
             let (cos, sin) = cos_sin(theta);
-            let a = dq_a.d * sin + dq_a.q * cos;
-            let b = dq_b.d * sin + dq_b.q * cos;
-            let c = dq_c.d * sin + dq_c.q * cos;
+            let a = dq_a.d * cos - dq_a.q * sin;
+            let b = dq_b.d * cos - dq_b.q * sin;
+            let c = dq_c.d * cos - dq_c.q * sin;
             let abc = Abc { a, b, c };
             let dq_pos = abc.to_dq(cos, sin, Sequence::POSITIVE);
             let dq_neg = abc.to_dq(cos, sin, Sequence::NEGATIVE);
