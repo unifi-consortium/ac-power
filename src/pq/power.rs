@@ -105,6 +105,7 @@ mod tests {
     use super::*;
     use crate::trig::cos_sin;
     use crate::trig::Theta;
+    use crate::Sequence;
     use approx::assert_abs_diff_eq;
 
     // helper function to assert pq approximate equality
@@ -131,8 +132,8 @@ mod tests {
         let i_alpha_beta0 = AlphaBeta0::from(i_abc);
         let pq_alpha_beta0 = v_alpha_beta0 * i_alpha_beta0;
 
-        let v_dq0 = v_abc.to_dq0(cos, sin);
-        let i_dq0 = i_abc.to_dq0(cos, sin);
+        let v_dq0 = v_abc.to_dq0(cos, sin, Sequence::POSITIVE);
+        let i_dq0 = i_abc.to_dq0(cos, sin, Sequence::POSITIVE);
         let pq_dq0 = v_dq0 * i_dq0;
 
         check_pqs(pq_abc, pq_alpha_beta0);

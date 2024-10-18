@@ -19,7 +19,7 @@ A simple three-phase waveform generator
 
 use crate::number::Num;
 use crate::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
-use crate::{Abc, Dq};
+use crate::{Abc, Dq, Sequence};
 
 pub struct Waveform<T, const N: usize> {
     pub positive: [Dq<T>; N],
@@ -45,8 +45,8 @@ impl<T: Num, const N: usize> Waveform<T, N> {
         let (mut cosn1, mut sinn1) = (Cos::from(1.0), Sin::from(0.0));
         let (mut cosn, mut sinn) = (cos, sin);
         for (pos, neg) in self.positive.iter().zip(self.negative.iter()) {
-            abc += pos.to_abc(cosn, sinn);
-            abc += neg.to_abc(cosn, -sinn);
+            abc += pos.to_abc(cosn, sinn, Sequence::POSITIVE);
+            abc += neg.to_abc(cosn, sinn, Sequence::NEGATIVE);
 
             // use chebychev function to calculate cos, sin of next harmonic
             let cosn2 = cosn1;

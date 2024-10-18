@@ -57,7 +57,7 @@ mod tests {
 
     use super::*;
     use crate::trig::{cos_sin, Theta};
-    use crate::Abc;
+    use crate::{Abc, Sequence};
     use approx::assert_relative_eq;
 
     fn linspace(x0: f32, x1: f32, length: usize) -> Vec<f32> {
@@ -110,8 +110,9 @@ mod tests {
             };
 
             // calculate the instantaneous a, b, c from sequences
-            let abc_sequence =
-                pos.to_abc(cos, sin) + neg.to_abc(cos, -sin) + zero.d * sin + zero.q * cos;
+            let abc_sequence = pos.to_abc(cos, sin, Sequence::POSITIVE)
+                + neg.to_abc(cos, sin, Sequence::NEGATIVE)
+                + zero.to_abc(cos, sin, Sequence::ZERO);
 
             // verify
             assert_relative_eq!(abc_phasor.a, abc_sequence.a, max_relative = 0.01);
@@ -141,8 +142,8 @@ mod tests {
             let b = dq_b.d * sin + dq_b.q * cos;
             let c = dq_c.d * sin + dq_c.q * cos;
             let abc = Abc { a, b, c };
-            let dq_pos = abc.to_dq(cos, sin);
-            let dq_neg = abc.to_dq(cos, -sin);
+            let dq_pos = abc.to_dq(cos, sin, Sequence::POSITIVE);
+            let dq_neg = abc.to_dq(cos, sin, Sequence::NEGATIVE);
             dq_pos_sum = dq_pos_sum + dq_pos;
             dq_neg_sum = dq_neg_sum + dq_neg;
         }
