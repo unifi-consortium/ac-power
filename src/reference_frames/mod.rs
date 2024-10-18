@@ -24,3 +24,9 @@ pub use alpha_beta::{AlphaBeta, AlphaBeta0};
 pub use dq::{Dq, Dq0};
 pub use polar::Polar;
 pub use transforms::{lines_to_seq, seq_to_lines};
+
+pub enum Sequence {
+    POSITIVE,
+    NEGATIVE,
+    ZERO,
+}

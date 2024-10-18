@@ -14,8 +14,8 @@
 //    limitations under the License.
 
 use crate::number::Num;
-use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0};
-use crate::trig::{shift_left_120, shift_right_120, Cos, Sin};
+use crate::trig::{neg_shift_120, pos_shift_120, Cos, Sin};
+use crate::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0, Sequence};
 
 impl<T: Num> From<Dq<T>> for Dq0<T> {
     fn from(dq: Dq<T>) -> Self {
@@ -34,14 +34,26 @@ impl<T> From<Dq0<T>> for Dq<T> {
 }
 
 impl<T: Num> Dq<T> {
-    pub fn to_abc(&self, cos: Cos, sin: Sin) -> Abc<T> {
-        /* sin and cos with 120 degree offsets */
-        let (cos_m, sin_m) = shift_left_120(cos, sin);
-        let (cos_p, sin_p) = shift_right_120(cos, sin);
+    pub fn to_abc(&self, cos: Cos, sin: Sin, sequence: Sequence) -> Abc<T> {
+        let (cos_b, sin_b, cos_c, sin_c): (Cos, Sin, Cos, Sin);
+        match sequence {
+            Sequence::POSITIVE => {
+                (cos_b, sin_b) = neg_shift_120(cos, sin);
+                (cos_c, sin_c) = pos_shift_120(cos, sin);
+            }
+            Sequence::NEGATIVE => {
+                (cos_c, sin_c) = neg_shift_120(cos, sin);
+                (cos_b, sin_b) = pos_shift_120(cos, sin);
+            }
+            Sequence::ZERO => {
+                (cos_c, sin_c) = (cos, sin);
+                (cos_b, sin_b) = (cos, sin);
+            }
+        }
 
-        let a = (self.d * sin) + (self.q * cos);
-        let b = (self.d * sin_m) + (self.q * cos_m);
-        let c = (self.d * sin_p) + (self.q * cos_p);
+        let a = (self.d * cos) + (self.q * sin);
+        let b = (self.d * cos_b) + (self.q * sin_b);
+        let c = (self.d * cos_c) + (self.q * sin_c);
 
         Abc { a, b, c }
     }
@@ -66,12 +78,12 @@ impl<T: Num> Dq<T> {
 }
 
 impl<T: Num> Dq0<T> {
-    pub fn to_abc(&self, cos: Cos, sin: Sin) -> Abc<T> {
+    pub fn to_abc(&self, cos: Cos, sin: Sin, sequence: Sequence) -> Abc<T> {
         Dq {
             d: self.d,
             q: self.q,
         }
-        .to_abc(cos, sin)
+        .to_abc(cos, sin, sequence)
             + self.zero
     }
 

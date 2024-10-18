@@ -140,14 +140,14 @@ pub fn rotate<
 /// # Examples
 ///
 /// ```
-/// use ac_power::trig::{shift_right_120, Theta, cos_sin};
+/// use ac_power::trig::{pos_shift_120, Theta, cos_sin};
 ///
 /// let (x, y) = (1.0, 0.0);
 /// let theta = Theta::from_degrees(90.0);
 /// let (cos, sin) = cos_sin(theta);
-/// let (cosr, sinr) = shift_right_120(cos, sin);
+/// let (cosr, sinr) = pos_shift_120(cos, sin);
 /// ```
-pub fn shift_right_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
+pub fn pos_shift_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
     let (cosr, sinr) = rotate(
         f32::from(cos),
         f32::from(sin),
@@ -162,14 +162,14 @@ pub fn shift_right_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
 /// # Examples
 ///
 /// ```
-/// use ac_power::trig::{shift_left_120, Theta, cos_sin};
+/// use ac_power::trig::{neg_shift_120, Theta, cos_sin};
 ///
 /// let (x, y) = (1.0, 0.0);
 /// let theta = Theta::from_degrees(90.0);
 /// let (cos, sin) = cos_sin(theta);
-/// let (cosr, sinr) = shift_left_120(cos, sin);
+/// let (cosr, sinr) = neg_shift_120(cos, sin);
 /// ```
-pub fn shift_left_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
+pub fn neg_shift_120(cos: Cos, sin: Sin) -> (Cos, Sin) {
     let (cosr, sinr) = rotate(
         f32::from(cos),
         f32::from(sin),
@@ -218,11 +218,11 @@ mod tests {
     }
 
     #[test]
-    fn shift_left() {
+    fn neg_shift() {
         let radians: f32 = 1.2;
         let theta = Theta::from_radians(radians);
         let (cos, sin) = cos_sin(theta);
-        let (cos_shifted, sin_shifted) = shift_left_120(cos, sin);
+        let (cos_shifted, sin_shifted) = neg_shift_120(cos, sin);
 
         assert_abs_diff_eq!(
             f32::from(sin_shifted),
@@ -237,11 +237,11 @@ mod tests {
     }
 
     #[test]
-    fn shift_right() {
+    fn pos_shift() {
         let radians: f32 = 1.2;
         let theta = Theta::from_radians(radians);
         let (cos, sin) = cos_sin(theta);
-        let (cos_shifted, sin_shifted) = shift_right_120(cos, sin);
+        let (cos_shifted, sin_shifted) = pos_shift_120(cos, sin);
 
         assert_abs_diff_eq!(
             f32::from(sin_shifted),
