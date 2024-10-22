@@ -18,7 +18,8 @@ use crate::number::Num;
 use crate::trig::{rotate, Cos, Sin, UnitVector};
 use crate::{Current, Impedance, Voltage};
 use core::ops::{Add, Mul, Neg, Sub};
-use libm::sqrtf;
+#[allow(unused_imports)]
+use num_traits::Float;
 
 fn inv_sqrt(x: f32) -> f32 {
     let i = x.to_bits();
@@ -198,7 +199,7 @@ impl<T: Num> Dq<T> {
     pub fn abs(&self) -> T {
         let d: f32 = self.d.into();
         let q: f32 = self.q.into();
-        sqrtf(d * d + q * q).into()
+        (d * d + q * q).sqrt().into()
     }
 
     pub fn clipped(&self, limit: T) -> Self {
@@ -216,7 +217,7 @@ impl<T: Num> Dq<T> {
         }
 
         // calculate scaling factor
-        let scale = sqrtf(limit_sqrd / amplitude_sqrd);
+        let scale = (limit_sqrd / amplitude_sqrd).sqrt();
 
         *self * scale
     }
@@ -236,7 +237,7 @@ impl<T: Num> Dq<T> {
         }
 
         // calculate scaling factor
-        let scale = sqrtf(limit_sqrd / amplitude_sqrd);
+        let scale = (limit_sqrd / amplitude_sqrd).sqrt();
 
         *self = *self * scale;
     }
