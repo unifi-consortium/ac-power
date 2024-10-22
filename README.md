@@ -41,7 +41,7 @@ let alpha_beta_zero = AlphaBeta0::from(abc);
 The library also includes a [trig module](crate::trig), which is useful when converting between stationary and rotating reference frames.
 
 ```rust
-use ac_power::{Abc, Dq0};
+use ac_power::{Abc, Dq0, Sequence};
 use ac_power::trig::{Theta, cos_sin};
 
 // create a vector in Abc reference frame
@@ -49,7 +49,7 @@ let abc = Abc {a: 100.0, b: 200.0, c: 50.0};
 
 // convert to Dq0
 let (cos, sin) = cos_sin(Theta::from_degrees(90.0));
-let dq0 = abc.to_dq0(cos, sin);
+let dq0 = abc.to_dq0(cos, sin, Sequence::POSITIVE);
 ```
 
 There are additional functions in the [trig module](crate::trig) for rotating Sin/Cos pairs or generating Sin(Nx), Cos(Nx) pairs using Chebyshev method.
@@ -216,7 +216,7 @@ Bellow is an example of a three-phase waveform generator that supports unbalance
 ```rust
 use ac_power::number::Num;
 use ac_power::trig::{chebyshev, cos_sin, Cos, Sin, Theta};
-use ac_power::{Abc, Dq};
+use ac_power::{Abc, Dq, Sequence};
 
 pub struct Waveform<T, const N: usize> {
     pub positive: [Dq<T>; N],
@@ -242,8 +242,8 @@ impl<T: Num, const N: usize> Waveform<T, N> {
         let (mut cosn1, mut sinn1) = (Cos::from(1.0), Sin::from(0.0));
         let (mut cosn, mut sinn) = (cos, sin);
         for (pos, neg) in self.positive.iter().zip(self.negative.iter()) {
-            abc += pos.to_abc(cosn, sinn);
-            abc += neg.to_abc(cosn, -sinn);
+            abc += pos.to_abc(cosn, sinn, Sequence::POSITIVE);
+            abc += neg.to_abc(cosn, sinn, Sequence::NEGATIVE);
 
             // use chebychev function to calculate cos, sin of next harmonic
             let cosn2 = cosn1;

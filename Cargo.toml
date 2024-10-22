@@ -13,7 +13,7 @@ readme = "README.md"
 [dependencies]
 idsp = "0.15.1"
 derive_more = "0.99.17"
-micromath = "2.1.0"
+libm = "0.2.8"
 
 [dev-dependencies]
 approx = "0.5.1"

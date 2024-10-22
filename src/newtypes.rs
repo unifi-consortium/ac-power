@@ -16,7 +16,7 @@
 use crate::trig::{Cos, Sin};
 use core::ops::{Div, Mul, MulAssign};
 use core::primitive::f32;
-use derive_more::{Add, AddAssign, From, Into, Neg, Sub};
+use derive_more::{Add, AddAssign, From, Into, Neg, Sub, SubAssign};
 
 macro_rules! impl_trig_ops {
     ($tr: ty, $nt: ty) => {
@@ -71,19 +71,27 @@ macro_rules! impl_number {
 }
 
 /// A newtype representing an electric voltage (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
+#[derive(
+    Neg, AddAssign, Add, SubAssign, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into,
+)]
 pub struct Voltage(f32);
 
 /// A newtype representing an electric current (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
+#[derive(
+    Neg, AddAssign, Add, SubAssign, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into,
+)]
 pub struct Current(f32);
 
 /// A newtype representing an electric power (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
+#[derive(
+    Neg, AddAssign, Add, SubAssign, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into,
+)]
 pub struct Power(f32);
 
 /// A newtype representing an electric impedance (wraps f32)
-#[derive(Neg, AddAssign, Add, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into)]
+#[derive(
+    Neg, AddAssign, Add, SubAssign, Sub, Debug, Copy, Clone, PartialEq, PartialOrd, From, Into,
+)]
 pub struct Impedance(f32);
 
 // derive operations for the new-types

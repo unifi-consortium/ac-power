@@ -9,15 +9,15 @@ use crate::reference_frames::Dq;
 /// Convert pos, neg, zero Dq's to line Dq's
 pub fn seq_to_lines<T: Num>(pos: Dq<T>, neg: Dq<T>, zero: Dq<T>) -> (Dq<T>, Dq<T>, Dq<T>) {
     let a = pos + neg + zero;
-    let b = pos.rotate_240() + neg.rotate_120() + zero;
-    let c = pos.rotate_120() + neg.rotate_240() + zero;
+    let b = pos.rotated_240() + neg.rotated_120() + zero;
+    let c = pos.rotated_120() + neg.rotated_240() + zero;
     (a, b, c)
 }
 
 /// Convert line phasors to pos, neg, zero
 pub fn lines_to_seq<T: Num>(a: Dq<T>, b: Dq<T>, c: Dq<T>) -> (Dq<T>, Dq<T>, Dq<T>) {
-    let pos = (a + b.rotate_120() + c.rotate_240()) * ONE_THIRD;
-    let neg = (a + b.rotate_240() + c.rotate_120()) * ONE_THIRD;
+    let pos = (a + b.rotated_120() + c.rotated_240()) * ONE_THIRD;
+    let neg = (a + b.rotated_240() + c.rotated_120()) * ONE_THIRD;
     let zero = (a + b + c) * ONE_THIRD;
 
     (pos, neg, zero)

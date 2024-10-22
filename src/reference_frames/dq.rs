@@ -15,12 +15,18 @@
 
 use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 use crate::number::Num;
-use crate::trig::rotate;
-use crate::trig::{Cos, Sin};
+use crate::trig::{rotate, Cos, Sin, UnitVector};
 use crate::{Current, Impedance, Voltage};
 use core::ops::{Add, Mul, Neg, Sub};
-#[allow(unused_imports)]
-use micromath::F32Ext;
+use libm::sqrtf;
+
+fn inv_sqrt(x: f32) -> f32 {
+    let i = x.to_bits();
+    let i = 0x5f375a86 - (i >> 1);
+    let y = f32::from_bits(i);
+
+    y * (1.5 - 0.5 * x * y * y)
+}
 
 /// Balanced rotating reference frame
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -35,54 +41,6 @@ pub struct Dq0<T> {
     pub d: T,
     pub q: T,
     pub zero: T,
-}
-
-impl<T: Num> Dq<T> {
-    pub fn abs(&self) -> T {
-        let d: f32 = self.d.into();
-        let q: f32 = self.q.into();
-        (d * d + q * q).sqrt().into()
-    }
-
-    pub fn clipped(&self, limit: T) -> Self {
-        // calculate square of limits
-        let limit: f32 = limit.into();
-        let d: f32 = self.d.into();
-        let q: f32 = self.q.into();
-        let limit_sqrd = limit * limit;
-
-        let amplitude_sqrd = d * d + q * q;
-
-        // if we are within the limit, return origial vector
-        if amplitude_sqrd <= limit_sqrd {
-            return *self;
-        }
-
-        // calculate scaling factor
-        let scale = (limit_sqrd / amplitude_sqrd).sqrt();
-
-        *self * scale
-    }
-
-    pub fn clip(&mut self, limit: T) {
-        // calculate square of limits
-        let limit: f32 = limit.into();
-        let d: f32 = self.d.into();
-        let q: f32 = self.q.into();
-        let limit_sqrd = limit * limit;
-
-        let amplitude_sqrd = d * d + q * q;
-
-        // if we are within the limit, return origial vector
-        if amplitude_sqrd <= limit_sqrd {
-            return;
-        }
-
-        // calculate scaling factor
-        let scale = (limit_sqrd / amplitude_sqrd).sqrt();
-
-        *self = *self * scale;
-    }
 }
 
 impl<T: Add<Output = T>> Add<Dq<T>> for Dq<T> {
@@ -201,30 +159,86 @@ impl<T: Num> Mul<f32> for Dq0<T> {
     type Output = Dq0<T>;
 }
 
-impl<
-        T: Mul<Sin, Output = T>
-            + Mul<Cos, Output = T>
-            + Sub<Output = T>
-            + Add<Output = T>
-            + Copy
-            + From<f32>,
-    > Dq<T>
-{
+impl<T: Num> Dq<T> {
     pub fn zero() -> Self {
         Self {
             d: 0.0.into(),
             q: 0.0.into(),
         }
     }
-    pub fn rotate(&self, cos: Cos, sin: Sin) -> Dq<T> {
+    pub fn rotate(&mut self, cos: Cos, sin: Sin) {
+        (self.d, self.q) = rotate(self.d, self.q, cos, sin);
+    }
+    pub fn rotate_120(&mut self) {
+        self.rotate((-ONE_HALF).into(), SQRT_3_OVER_2.into())
+    }
+    pub fn rotate_240(&mut self) {
+        self.rotate((-ONE_HALF).into(), (-SQRT_3_OVER_2).into())
+    }
+    pub fn rotated(&self, cos: Cos, sin: Sin) -> Dq<T> {
         let (d, q) = rotate(self.d, self.q, cos, sin);
         Dq { d, q }
     }
-    pub fn rotate_120(&self) -> Dq<T> {
-        self.rotate((-ONE_HALF).into(), SQRT_3_OVER_2.into())
+    pub fn rotated_120(&self) -> Dq<T> {
+        self.rotated((-ONE_HALF).into(), SQRT_3_OVER_2.into())
     }
-    pub fn rotate_240(&self) -> Dq<T> {
-        self.rotate((-ONE_HALF).into(), (-SQRT_3_OVER_2).into())
+    pub fn rotated_240(&self) -> Dq<T> {
+        self.rotated((-ONE_HALF).into(), (-SQRT_3_OVER_2).into())
+    }
+
+    pub fn normalize(&self) -> UnitVector {
+        let d: f32 = self.d.into();
+        let q: f32 = self.q.into();
+        let scale = inv_sqrt(d * d + q * q);
+        let cos = Cos::from(scale * d);
+        let sin = Sin::from(scale * q);
+        UnitVector { cos, sin }
+    }
+
+    pub fn abs(&self) -> T {
+        let d: f32 = self.d.into();
+        let q: f32 = self.q.into();
+        sqrtf(d * d + q * q).into()
+    }
+
+    pub fn clipped(&self, limit: T) -> Self {
+        // calculate square of limits
+        let limit: f32 = limit.into();
+        let d: f32 = self.d.into();
+        let q: f32 = self.q.into();
+        let limit_sqrd = limit * limit;
+
+        let amplitude_sqrd = d * d + q * q;
+
+        // if we are within the limit, return origial vector
+        if amplitude_sqrd <= limit_sqrd {
+            return *self;
+        }
+
+        // calculate scaling factor
+        let scale = sqrtf(limit_sqrd / amplitude_sqrd);
+
+        *self * scale
+    }
+
+    pub fn clip(&mut self, limit: T) {
+        // calculate square of limits
+        let limit: f32 = limit.into();
+        let d: f32 = self.d.into();
+        let q: f32 = self.q.into();
+        let limit_sqrd = limit * limit;
+
+        let amplitude_sqrd = d * d + q * q;
+
+        // if we are within the limit, return origial vector
+        if amplitude_sqrd <= limit_sqrd {
+            return;
+        }
+
+        // calculate scaling factor
+        let scale = sqrtf(limit_sqrd / amplitude_sqrd);
+
+        *self = *self * scale;
     }
 }
 

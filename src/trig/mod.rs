@@ -85,7 +85,7 @@ The trig modules contains 5 functions which are useful for ac power processing
 
 mod newtypes;
 use core::ops::{Add, Mul, Sub};
-pub use newtypes::{Cos, Sin, Theta};
+pub use newtypes::{Cos, Sin, Theta, UnitVector};
 
 use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 
