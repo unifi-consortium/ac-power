@@ -167,24 +167,26 @@ impl<T: Num> Dq<T> {
             q: 0.0.into(),
         }
     }
-    pub fn rotate(&mut self, cos: Cos, sin: Sin) {
-        (self.d, self.q) = rotate(self.d, self.q, cos, sin);
+    pub fn rotate(&mut self, phase: UnitVector) {
+        (self.d, self.q) = rotate(self.d, self.q, phase.cos, phase.sin);
     }
     pub fn rotate_120(&mut self) {
-        self.rotate((-ONE_HALF).into(), SQRT_3_OVER_2.into())
+        (self.d, self.q) = rotate(self.d, self.q, (-ONE_HALF).into(), SQRT_3_OVER_2.into());
     }
     pub fn rotate_240(&mut self) {
-        self.rotate((-ONE_HALF).into(), (-SQRT_3_OVER_2).into())
+        (self.d, self.q) = rotate(self.d, self.q, (-ONE_HALF).into(), (-SQRT_3_OVER_2).into());
     }
-    pub fn rotated(&self, cos: Cos, sin: Sin) -> Dq<T> {
-        let (d, q) = rotate(self.d, self.q, cos, sin);
+    pub fn rotated(&self, phase: UnitVector) -> Dq<T> {
+        let (d, q) = rotate(self.d, self.q, phase.cos, phase.sin);
         Dq { d, q }
     }
     pub fn rotated_120(&self) -> Dq<T> {
-        self.rotated((-ONE_HALF).into(), SQRT_3_OVER_2.into())
+        let (d, q) = rotate(self.d, self.q, (-ONE_HALF).into(), SQRT_3_OVER_2.into());
+        Dq { d, q }
     }
     pub fn rotated_240(&self) -> Dq<T> {
-        self.rotated((-ONE_HALF).into(), (-SQRT_3_OVER_2).into())
+        let (d, q) = rotate(self.d, self.q, (-ONE_HALF).into(), (-SQRT_3_OVER_2).into());
+        Dq { d, q }
     }
 
     pub fn normalize(&self) -> UnitVector {
