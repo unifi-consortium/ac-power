@@ -44,6 +44,25 @@ pub struct Dq0<T> {
     pub zero: T,
 }
 
+impl<T: Num> Neg for Dq<T> {
+    fn neg(self) -> Dq<T> {
+        let d = -self.d;
+        let q = -self.q;
+        Dq { d, q }
+    }
+    type Output = Dq<T>;
+}
+
+impl<T: Num> Neg for Dq0<T> {
+    fn neg(self) -> Dq0<T> {
+        let d = -self.d;
+        let q = -self.q;
+        let zero = -self.zero;
+        Dq0 { d, q, zero }
+    }
+    type Output = Dq0<T>;
+}
+
 impl<T: Add<Output = T>> Add<Dq<T>> for Dq<T> {
     fn add(self, other: Dq<T>) -> Dq<T> {
         let d = self.d + other.d;
