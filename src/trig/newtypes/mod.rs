@@ -20,6 +20,8 @@ mod theta;
 use crate::trig::{cos_sin, rotate};
 use core::ops::{Add, Mul, Neg, Sub};
 pub use cos::Cos;
+#[allow(unused_imports)]
+use num_traits::Float;
 pub use sin::Sin;
 pub use theta::Theta;
 
@@ -77,6 +79,15 @@ impl UnitVector {
     pub fn from_radians(radians: f32) -> Self {
         let theta = Theta::from_radians(radians);
         theta.into()
+    }
+
+    pub fn avg(v0: Self, v1: Self) -> Self {
+        let cos_sum = f32::from(v0.cos) + f32::from(v1.cos);
+        let sin_sum = f32::from(v0.sin) + f32::from(v1.sin);
+        let scale = (cos_sum * cos_sum + sin_sum * sin_sum).sqrt().recip();
+        let cos = Cos::from(cos_sum * scale);
+        let sin = Sin::from(sin_sum * scale);
+        Self { cos, sin }
     }
 }
 
