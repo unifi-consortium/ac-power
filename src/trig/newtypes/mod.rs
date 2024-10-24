@@ -81,10 +81,65 @@ impl UnitVector {
         theta.into()
     }
 
+    pub fn rotate(&mut self, phase: UnitVector) {
+        let mut cos: f32 = self.cos.into();
+        let mut sin: f32 = self.sin.into();
+        (cos, sin) = rotate(cos, sin, phase.cos, phase.sin);
+        self.cos = cos.into();
+        self.sin = sin.into();
+    }
+
+    pub fn rotate_90(&mut self) {
+        let cos: f32 = self.sin.into();
+        let sin: f32 = self.cos.into();
+        (self.cos, self.sin) = ((-cos).into(), sin.into());
+    }
+
+    // pub fn rotate_120(&mut self) {
+    //     (self.d, self.q) = rotate(self.d, self.q, (-ONE_HALF).into(), SQRT_3_OVER_2.into());
+    // }
+    // pub fn rotate_240(&mut self) {
+    //     (self.d, self.q) = rotate(self.d, self.q, (-ONE_HALF).into(), (-SQRT_3_OVER_2).into());
+    // }
+
+    pub fn rotated(&self, phase: UnitVector) -> Self {
+        let mut cos: f32 = self.cos.into();
+        let mut sin: f32 = self.sin.into();
+        (cos, sin) = rotate(cos, sin, phase.cos, phase.sin);
+        Self {
+            cos: cos.into(),
+            sin: sin.into(),
+        }
+    }
+
+    pub fn rotated_90(&self) -> Self {
+        let cos: f32 = self.sin.into();
+        let sin: f32 = self.cos.into();
+        Self {
+            cos: (-cos).into(),
+            sin: sin.into(),
+        }
+    }
+
+    // pub fn rotated_120(&self) -> Dq<T> {
+    //     let (d, q) = rotate(self.d, self.q, (-ONE_HALF).into(), SQRT_3_OVER_2.into());
+    //     Dq { d, q }
+    // }
+    // pub fn rotated_240(&self) -> Dq<T> {
+    //     let (d, q) = rotate(self.d, self.q, (-ONE_HALF).into(), (-SQRT_3_OVER_2).into());
+    //     Dq { d, q }
+    // }
+
     pub fn avg(v0: Self, v1: Self) -> Self {
         let cos_sum = f32::from(v0.cos) + f32::from(v1.cos);
         let sin_sum = f32::from(v0.sin) + f32::from(v1.sin);
-        let scale = (cos_sum * cos_sum + sin_sum * sin_sum).sqrt().recip();
+        let mag = (cos_sum * cos_sum + sin_sum * sin_sum).sqrt();
+
+        // divide by 0 protection when vectors are 180 degrees appart
+        if mag == 0.0 {
+            return v0.rotated_90();
+        }
+        let scale = mag.recip();
         let cos = Cos::from(cos_sum * scale);
         let sin = Sin::from(sin_sum * scale);
         Self { cos, sin }
