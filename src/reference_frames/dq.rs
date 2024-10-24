@@ -21,14 +21,6 @@ use core::ops::{Add, Mul, Neg, Sub};
 #[allow(unused_imports)]
 use num_traits::Float;
 
-fn inv_sqrt(x: f32) -> f32 {
-    let i = x.to_bits();
-    let i = 0x5f375a86 - (i >> 1);
-    let y = f32::from_bits(i);
-
-    y * (1.5 - 0.5 * x * y * y)
-}
-
 /// Balanced rotating reference frame
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Dq<T> {
@@ -209,9 +201,18 @@ impl<T: Num> Dq<T> {
     }
 
     pub fn normalize(&self) -> UnitVector {
+        let mag: f32 = self.abs().into();
+
+        // divide by 0 protection
+        if mag == 0.0 {
+            return UnitVector {
+                cos: 1.0.into(),
+                sin: 0.0.into(),
+            };
+        }
+        let scale = mag.recip();
         let d: f32 = self.d.into();
         let q: f32 = self.q.into();
-        let scale = inv_sqrt(d * d + q * q);
         let cos = Cos::from(scale * d);
         let sin = Sin::from(scale * q);
         UnitVector { cos, sin }
