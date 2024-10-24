@@ -135,7 +135,7 @@ Many inverter control systems that implement advanced grid controls or grid form
 Bellow is an example of a simple three-phase Phased Locked Loop implementation, a common DSP block in inverter controls and advanced power meters, to illustrate how the crate can be used to facillitate such applications.
 
 ```rust
-use ac_power::{Abc, AlphaBeta, Dq};
+use ac_power::{Abc, AlphaBeta, Dq, Sequence};
 use ac_power::trig::{cos_sin, Cos, Sin, Theta};
 use ac_power::Voltage;
 use idsp::iir::{Action, Biquad, Pid};
@@ -196,8 +196,8 @@ impl Pll {
         let alpha_beta = AlphaBeta::from(abc);
 
         // park transforms
-        self.dq_pos = alpha_beta.to_dq(self.cos, self.sin);
-        self.dq_neg = alpha_beta.to_dq(self.cos, -self.sin);
+        self.dq_pos = alpha_beta.to_dq(self.cos, self.sin, Sequence::POSITIVE);
+        self.dq_neg = alpha_beta.to_dq(self.cos, self.sin, Sequence::NEGATIVE);
 
         // PI loop filter
         self.f = self.fref + self.filter.update(&mut self.filter_state, self.dq_pos.q.into());

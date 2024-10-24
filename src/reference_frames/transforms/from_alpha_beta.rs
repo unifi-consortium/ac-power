@@ -17,6 +17,7 @@ use crate::constants::{ONE_HALF, SQRT_3_OVER_2};
 use crate::number::Num;
 use crate::reference_frames::{Abc, AlphaBeta, AlphaBeta0, Dq, Dq0};
 use crate::trig::{Cos, Sin};
+use crate::Sequence;
 
 impl<T: Num> From<AlphaBeta<T>> for Abc<T> {
     fn from(alpha_beta: AlphaBeta<T>) -> Self {
@@ -64,19 +65,29 @@ impl<T: Num> AlphaBeta<T> {
     /// # Examples
     ///
     /// ```
-    /// use ac_power::{Abc, AlphaBeta};
+    /// use ac_power::{Abc, AlphaBeta, Sequence};
     /// use ac_power::trig::{Theta, cos_sin};
     ///
     /// let theta = Theta::from_degrees(45.0);
     /// let (cos, sin) = cos_sin(theta);
     /// let alpha_beta = AlphaBeta::from(Abc::from_polar(100.0, theta));
-    /// let dq = alpha_beta.to_dq(cos, sin);
+    /// let dq = alpha_beta.to_dq(cos, sin, Sequence::POSITIVE);
     /// ```
-    pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq<T> {
-        let d = (self.alpha * cos) + (self.beta * sin);
-        let q = -(self.alpha * sin) + (self.beta * cos);
-
-        Dq { d, q }
+    pub fn to_dq(&self, cos: Cos, sin: Sin, sequence: Sequence) -> Dq<T> {
+        match sequence {
+            Sequence::POSITIVE => Dq {
+                d: (self.alpha * cos) + (self.beta * sin),
+                q: -(self.alpha * sin) + (self.beta * cos),
+            },
+            Sequence::NEGATIVE => Dq {
+                d: (self.alpha * cos) - (self.beta * sin),
+                q: -(self.alpha * sin) - (self.beta * cos),
+            },
+            Sequence::ZERO => Dq {
+                d: (self.alpha * cos) + (self.beta * sin),
+                q: -(self.alpha * sin) + (self.beta * cos),
+            },
+        }
     }
 
     /// Transform from AlphaBeta to Dq0 reference frame using Clarke transfom
@@ -85,16 +96,16 @@ impl<T: Num> AlphaBeta<T> {
     /// # Examples
     ///
     /// ```
-    /// use ac_power::{Abc, AlphaBeta};
+    /// use ac_power::{Abc, AlphaBeta, Sequence};
     /// use ac_power::trig::{Theta, cos_sin};
     ///
     /// let theta = Theta::from_degrees(45.0);
     /// let (cos, sin) = cos_sin(theta);
     /// let alpha_beta = AlphaBeta::from(Abc::from_polar(100.0, theta));
-    /// let dq0 = alpha_beta.to_dq0(cos, sin);
+    /// let dq0 = alpha_beta.to_dq0(cos, sin, Sequence::POSITIVE);
     /// ```
-    pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0<T> {
-        let dq = self.to_dq(cos, sin);
+    pub fn to_dq0(&self, cos: Cos, sin: Sin, sequence: Sequence) -> Dq0<T> {
+        let dq = self.to_dq(cos, sin, sequence);
 
         Dq0 {
             d: dq.d,
@@ -111,19 +122,16 @@ impl<T: Num> AlphaBeta0<T> {
     /// # Examples
     ///
     /// ```
-    /// use ac_power::{Abc, AlphaBeta0};
+    /// use ac_power::{Abc, AlphaBeta0, Sequence};
     /// use ac_power::trig::{Theta, cos_sin};
     ///
     /// let theta = Theta::from_degrees(45.0);
     /// let (cos, sin) = cos_sin(theta);
     /// let alpha_beta = AlphaBeta0::from(Abc::from_polar(100.0, theta));
-    /// let dq = alpha_beta.to_dq(cos, sin);
+    /// let dq = alpha_beta.to_dq(cos, sin, Sequence::POSITIVE);
     /// ```
-    pub fn to_dq(&self, cos: Cos, sin: Sin) -> Dq<T> {
-        let d = (self.alpha * cos) + (self.beta * sin);
-        let q = -(self.alpha * sin) + (self.beta * cos);
-
-        Dq { d, q }
+    pub fn to_dq(&self, cos: Cos, sin: Sin, sequence: Sequence) -> Dq<T> {
+        AlphaBeta::from(*self).to_dq(cos, sin, sequence)
     }
 
     //// Transform from AlphaBeta0 to Dq0 reference frame using Clarke transfom
@@ -132,22 +140,53 @@ impl<T: Num> AlphaBeta0<T> {
     /// # Examples
     ///
     /// ```
-    /// use ac_power::{Abc, AlphaBeta0};
+    /// use ac_power::{Abc, AlphaBeta0, Sequence};
     /// use ac_power::trig::{Theta, cos_sin};
     ///
     /// let theta = Theta::from_degrees(45.0);
     /// let (cos, sin) = cos_sin(theta);
     /// let alpha_beta = AlphaBeta0::from(Abc::from_polar(100.0, theta));
-    /// let dq0 = alpha_beta.to_dq0(cos, sin);
+    /// let dq0 = alpha_beta.to_dq0(cos, sin, Sequence::POSITIVE);
     /// ```
-    pub fn to_dq0(&self, cos: Cos, sin: Sin) -> Dq0<T> {
-        let dq = self.to_dq(cos, sin);
+    pub fn to_dq0(&self, cos: Cos, sin: Sin, sequence: Sequence) -> Dq0<T> {
+        let dq = self.to_dq(cos, sin, sequence);
 
         Dq0 {
             d: dq.d,
             q: dq.q,
             zero: self.zero,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::trig::{cos_sin, Theta};
+    use crate::Sequence;
+    use approx::assert_abs_diff_eq;
+
+    #[test]
+    fn alpha_beta_to_dq_positive() {
+        let dq = Dq { d: 1.0, q: 2.0 };
+        let (cos, sin) = cos_sin(Theta::from_degrees(127.0));
+        let abc = dq.to_abc(cos, sin, Sequence::POSITIVE);
+        let alpha_beta = AlphaBeta::from(abc);
+        let dq_derived = alpha_beta.to_dq(cos, sin, Sequence::POSITIVE);
+        assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
+    }
+
+    #[test]
+    fn alpha_beta_to_dq_negative() {
+        let dq = Dq { d: 1.0, q: 2.0 };
+        let (cos, sin) = cos_sin(Theta::from_degrees(127.0));
+        let abc = dq.to_abc(cos, sin, Sequence::NEGATIVE);
+        let alpha_beta = AlphaBeta::from(abc);
+        let dq_derived = alpha_beta.to_dq(cos, sin, Sequence::NEGATIVE);
+        assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
     }
 }
 
