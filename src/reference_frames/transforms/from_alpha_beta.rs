@@ -175,7 +175,7 @@ mod tests {
         let alpha_beta = AlphaBeta::from(abc);
         let dq_derived = alpha_beta.to_dq(cos, sin, Sequence::POSITIVE);
         assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
-        assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq.q, dq_derived.q, epsilon = 0.0001);
     }
 
     #[test]
@@ -186,7 +186,7 @@ mod tests {
         let alpha_beta = AlphaBeta::from(abc);
         let dq_derived = alpha_beta.to_dq(cos, sin, Sequence::NEGATIVE);
         assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
-        assert_abs_diff_eq!(dq.d, dq_derived.d, epsilon = 0.0001);
+        assert_abs_diff_eq!(dq.q, dq_derived.q, epsilon = 0.0001);
     }
 }
 
